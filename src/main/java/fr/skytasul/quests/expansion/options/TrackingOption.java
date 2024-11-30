@@ -1,10 +1,5 @@
 package fr.skytasul.quests.expansion.options;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import fr.skytasul.quests.api.gui.ItemUtils;
 import fr.skytasul.quests.api.objects.QuestObjectLocation;
 import fr.skytasul.quests.api.options.QuestOption;
@@ -19,10 +14,17 @@ import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
 import fr.skytasul.quests.expansion.api.tracking.Tracker;
 import fr.skytasul.quests.expansion.api.tracking.TrackerCreator;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TrackingOption<T extends AbstractStage & Locatable> extends StageOption<T> {
 
-	private List<Tracker> trackers;
+	private @NotNull List<Tracker> trackers = Collections.emptyList();
 
 	private int itemSlot;
 
@@ -30,16 +32,25 @@ public class TrackingOption<T extends AbstractStage & Locatable> extends StageOp
 		super(stageClass);
 	}
 
+	private void setTrackers(List<Tracker> trackers) {
+		this.trackers.forEach(Tracker::detach);
+
+		this.trackers = Collections.unmodifiableList(trackers);
+
+		// TODO attach the trackers
+	}
+
 	@Override
 	public StageOption<T> clone() {
 		TrackingOption<T> option = new TrackingOption<>(getStageClass());
-		if (trackers != null && !trackers.isEmpty()) option.trackers = trackers.stream().map(Tracker::clone).collect(Collectors.toList());
+		if (!trackers.isEmpty())
+			option.trackers = trackers.stream().map(Tracker::clone).collect(Collectors.toList());
 		return option;
 	}
 
 	@Override
 	public boolean shouldSave() {
-		return trackers != null && !trackers.isEmpty();
+		return !trackers.isEmpty();
 	}
 
 	@Override
@@ -51,15 +62,18 @@ public class TrackingOption<T extends AbstractStage & Locatable> extends StageOp
 
 	@Override
 	public void load(ConfigurationSection section) {
+		var trackers = new ArrayList<Tracker>();
 		for (String key : section.getKeys(false)) {
 			TrackerCreator creator = BeautyQuestsExpansion.getInstance().getTrackersRegistry().getByID(key);
-			if (creator != null) {
-				if (trackers == null) trackers = new ArrayList<>();
+			if (creator == null) {
+				BeautyQuestsExpansion.getInstance().getLogger().warning("Cannot find tracker type " + key);
+			} else {
 				Tracker tracker = creator.newObject();
 				tracker.load(section.getConfigurationSection(key));
 				trackers.add(tracker);
 			}
 		}
+		setTrackers(trackers);
 	}
 
 	@Override
@@ -68,30 +82,28 @@ public class TrackingOption<T extends AbstractStage & Locatable> extends StageOp
 				ItemUtils.item(XMaterial.COMPASS, LangExpansion.Tracking_Gui_Name.toString(), getLore()), event -> {
 					BeautyQuestsExpansion.getInstance().getTrackersRegistry()
 							.createGUI(QuestObjectLocation.OTHER, trackers -> {
-								this.trackers = trackers.isEmpty() ? null : trackers;
+								setTrackers(trackers);
 								creation.getLine().refreshItemLore(itemSlot, getLore());
 								event.reopen();
-							}, trackers == null ? new ArrayList<>() : trackers,
-									creator -> creator.matches(creation.getCreationContext().getType()))
+							}, trackers, creator -> creator.matches(creation.getCreationContext().getType()))
 							.open(event.getPlayer());
 				});
 	}
 
 	private String[] getLore() {
 		return new String[] {QuestOption.formatDescription(
-				LangExpansion.Tracking_Trackers.quickFormat("trackers_amount", trackers == null ? 0 : trackers.size())), "",
+				LangExpansion.Tracking_Trackers.quickFormat("trackers_amount", trackers.size())), "",
 				LangExpansion.Expansion_Label.toString()};
 	}
 
 	@Override
 	public void stageLoad(StageController stage) {
-		if (trackers != null)
-			trackers.forEach(x -> x.start((T) stage.getStage()));
+		trackers.forEach(x -> x.start((T) stage.getStage()));
 	}
 
 	@Override
 	public void stageUnload(StageController stage) {
-		if (trackers != null) trackers.forEach(Tracker::stop);
+		trackers.forEach(Tracker::stop);
 	}
 
 	@Override
@@ -116,11 +128,12 @@ public class TrackingOption<T extends AbstractStage & Locatable> extends StageOp
 	}
 
 	private void showTrackers(Player player, Locatable stage) {
-		if (trackers != null && stage.isShown(player)) trackers.forEach(x -> x.show(player));
+		if (stage.isShown(player))
+			trackers.forEach(x -> x.show(player));
 	}
 
 	private void hideTrackers(Player p) {
-		if (trackers != null) trackers.forEach(x -> x.hide(p));
+		trackers.forEach(x -> x.hide(p));
 	}
 
 }
