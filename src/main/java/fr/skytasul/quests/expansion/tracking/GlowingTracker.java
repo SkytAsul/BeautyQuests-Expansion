@@ -1,14 +1,5 @@
 package fr.skytasul.quests.expansion.tracking;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import fr.skytasul.glowingentities.GlowingBlocks;
 import fr.skytasul.glowingentities.GlowingEntities;
 import fr.skytasul.quests.BeautyQuests;
@@ -29,30 +20,47 @@ import fr.skytasul.quests.api.stages.types.Locatable.MultipleLocatable.NearbyFet
 import fr.skytasul.quests.api.stages.types.Locatable.PreciseLocatable;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
 import fr.skytasul.quests.expansion.api.tracking.Tracker;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class GlowingTracker extends AbstractTaskTracker {
 
 	private static final ChatColor DEFAULT_COLOR = ChatColor.GREEN;
+	private static final double DEFAULT_MAX_DISTANCE = 40;
+	private static final boolean DEFAULT_BLOCK_UNDER_ENTITY = false;
+	private static final int DEFAULT_MAX_AMOUNT = 10;
+
 	private static final long UPDATE_RATE = 50L;
 
 	private static GlowingEntities ENTITIES_API;
 	private static GlowingBlocks BLOCKS_API;
 
 	private ChatColor color;
-	private double maxDistance = 40;
-	private int maxAmount = 10;
+	private double maxDistance;
+	private int maxAmount;
+	private boolean blockUnderEntity;
 
 	private Map<Player, Set<Glowing>> shown;
 
 	public GlowingTracker() {
-		this(DEFAULT_COLOR);
+		this(DEFAULT_COLOR, DEFAULT_MAX_DISTANCE, DEFAULT_MAX_AMOUNT, DEFAULT_BLOCK_UNDER_ENTITY);
 	}
 
-	public GlowingTracker(ChatColor color) {
+	public GlowingTracker(ChatColor color, double maxDistance, int maxAmount, boolean blockUnderEntity) {
 		super(UPDATE_RATE);
-		initializeUtils();
-
 		this.color = color;
+		this.maxDistance = maxDistance;
+		this.maxAmount = maxAmount;
+		this.blockUnderEntity = blockUnderEntity;
+
+		initializeUtils();
 	}
 
 	@Override
@@ -88,7 +96,7 @@ public class GlowingTracker extends AbstractTaskTracker {
 					});
 				}
 			} else if (located instanceof LocatedBlock && isBlocksEnabled()) {
-				Location block = ((LocatedBlock) located).getLocation();
+				Location block = located.getLocation();
 				if (block != null) {
 					shown.forEach((player, set) -> {
 						foundLocatedBlock(player, set, block);
@@ -115,7 +123,7 @@ public class GlowingTracker extends AbstractTaskTracker {
 						.getNearbyLocated(NearbyFetcher.create(player.getLocation(), maxDistance, LocatedType.BLOCK));
 				for (; i < maxAmount; i++) {
 					if (!locateds
-							.tryAdvance(located -> foundLocatedBlock(player, set, ((LocatedBlock) located).getLocation())))
+							.tryAdvance(located -> foundLocatedBlock(player, set, located.getLocation())))
 						break;
 				}
 			});
@@ -159,7 +167,7 @@ public class GlowingTracker extends AbstractTaskTracker {
 
 	@Override
 	public Tracker clone() {
-		return new GlowingTracker(color);
+		return new GlowingTracker(color, maxDistance, maxAmount, blockUnderEntity);
 	}
 
 	@Override
@@ -191,12 +199,26 @@ public class GlowingTracker extends AbstractTaskTracker {
 
 	@Override
 	public void save(ConfigurationSection section) {
-		if (color != DEFAULT_COLOR) section.set("color", color.name());
+		if (color != DEFAULT_COLOR)
+			section.set("color", color.name());
+		if (maxDistance != DEFAULT_MAX_DISTANCE)
+			section.set("max distance", maxDistance);
+		if (maxAmount != DEFAULT_MAX_AMOUNT)
+			section.set("max amount", maxAmount);
+		if (blockUnderEntity != DEFAULT_BLOCK_UNDER_ENTITY)
+			section.set("block under entity", blockUnderEntity);
 	}
 
 	@Override
 	public void load(ConfigurationSection section) {
-		if (section.contains("color")) color = ChatColor.valueOf(section.getString("color"));
+		if (section.contains("color"))
+			color = ChatColor.valueOf(section.getString("color"));
+		if (section.contains("max distance"))
+			maxDistance = section.getDouble("max distance");
+		if (section.contains("max amount"))
+			maxAmount = section.getInt("max amount");
+		if (section.contains("block under entity"))
+			blockUnderEntity = section.getBoolean("block under entity");
 	}
 
 	abstract class Glowing {
@@ -225,6 +247,9 @@ public class GlowingTracker extends AbstractTaskTracker {
 		public void display() {
 			try {
 				ENTITIES_API.setGlowing(entity, player, color);
+
+				if (blockUnderEntity && isBlocksEnabled())
+					BLOCKS_API.setGlowing(entity.getLocation().subtract(0, 1, 0), player, color);
 			}catch (ReflectiveOperationException e) {
 				e.printStackTrace();
 			}
@@ -234,6 +259,9 @@ public class GlowingTracker extends AbstractTaskTracker {
 		public void remove() {
 			try {
 				ENTITIES_API.unsetGlowing(entity, player);
+
+				if (blockUnderEntity && isBlocksEnabled())
+					BLOCKS_API.unsetGlowing(entity.getLocation().subtract(0, 1, 0), player);
 			}catch (ReflectiveOperationException e) {
 				e.printStackTrace();
 			}
