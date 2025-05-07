@@ -91,7 +91,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 	@SuppressWarnings("unused") // because we don't always use major, minor and revision at the same time
 	private boolean isBQUpToDate() {
-		Pattern bqVersion = Pattern.compile("(\\d+)\\.(\\d+)(?>\\.(\\d+))?(?>_BUILD(.+))?");
+		Pattern bqVersion = Pattern.compile("(\\d+)\\.(\\d+)(?>\\.(\\d+))?(?>\\+build\\.(.+))?");
 		Matcher matcher = bqVersion.matcher(QuestsPlugin.getPlugin().getDescription().getVersion());
 		if (matcher.find()) {
 			int major = Integer.parseInt(matcher.group(1));
@@ -102,19 +102,21 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 			if (buildStr == null) {
 				// means it's a release: we must use the major/minor/revision numbers
-				return major >= 1 && revision >= 3;
+				return major >= 1 && revision >= 5;
 			} else {
 				// we have build number: it's easier to just use it instead of the version numbers
 				try {
 					int build = Integer.parseInt(buildStr);
-					return build >= 367;
+					return build >= 15;
 				}catch (NumberFormatException ex) {
-					// means that the build number is not actually a number
-					// will fallback to "cannot parse"
+					logger.warning(
+							"Cannot parse BeautyQuests version. This version of the expansion might not be compatible.");
 				}
 			}
+		} else {
+			// Probably using old BQ versioning scheme (not semver-compliant)
+			logger.warning("Cannot parse BeautyQuests version. Are you using the latest one?");
 		}
-		logger.warning("Cannot parse BeautyQuests version.");
 		return true;
 	}
 
