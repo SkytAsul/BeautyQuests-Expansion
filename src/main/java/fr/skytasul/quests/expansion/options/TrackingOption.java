@@ -1,15 +1,15 @@
 package fr.skytasul.quests.expansion.options;
 
+import com.cryptomorin.xseries.XMaterial;
 import fr.skytasul.quests.api.gui.ItemUtils;
 import fr.skytasul.quests.api.objects.QuestObjectLocation;
 import fr.skytasul.quests.api.options.QuestOption;
-import fr.skytasul.quests.api.players.PlayerAccount;
+import fr.skytasul.quests.api.questers.Quester;
 import fr.skytasul.quests.api.stages.AbstractStage;
 import fr.skytasul.quests.api.stages.StageController;
 import fr.skytasul.quests.api.stages.creation.StageCreation;
 import fr.skytasul.quests.api.stages.options.StageOption;
 import fr.skytasul.quests.api.stages.types.Locatable;
-import fr.skytasul.quests.api.utils.XMaterial;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
 import fr.skytasul.quests.expansion.api.tracking.Tracker;
 import fr.skytasul.quests.expansion.api.tracking.TrackerCreator;
@@ -107,23 +107,26 @@ public class TrackingOption<T extends AbstractStage & Locatable> extends StageOp
 	}
 
 	@Override
-	public void stageStart(PlayerAccount acc, StageController stage) {
-		if (acc.isCurrent())
-			showTrackers(acc.getPlayer(), (T) stage.getStage());
+	public void stageStart(Quester quester, StageController stage) {
+		for (Player player : quester.getOnlinePlayers()) {
+			showTrackers(player, (T) stage.getStage());
+		}
 	}
 
 	@Override
-	public void stageJoin(Player p, StageController stage) {
+	public void stageJoin(@NotNull Player p, @NotNull Quester quester, @NotNull StageController stage) {
 		showTrackers(p, (T) stage.getStage());
 	}
 
 	@Override
-	public void stageEnd(PlayerAccount acc, StageController stage) {
-		if (acc.isCurrent()) hideTrackers(acc.getPlayer());
+	public void stageEnd(Quester quester, StageController stage) {
+		for (Player player : quester.getOnlinePlayers()) {
+			hideTrackers(player);
+		}
 	}
 
 	@Override
-	public void stageLeave(Player p, StageController stage) {
+	public void stageLeave(@NotNull Player p, @NotNull Quester quester, StageController stage) {
 		hideTrackers(p);
 	}
 

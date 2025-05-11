@@ -1,17 +1,17 @@
 package fr.skytasul.quests.expansion.points;
 
+import fr.skytasul.quests.api.players.PlayersManager;
+import fr.skytasul.quests.api.questers.Quester;
+import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
+import fr.skytasul.quests.expansion.points.QuestPointsLeaderboard.LeaderboardEntry;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.bukkit.OfflinePlayer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import fr.skytasul.quests.api.players.PlayerAccount;
-import fr.skytasul.quests.api.players.PlayersManager;
-import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
-import fr.skytasul.quests.expansion.points.QuestPointsLeaderboard.LeaderboardEntry;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 public class QuestPointsPlaceholders extends PlaceholderExpansion {
 
@@ -64,10 +64,10 @@ public class QuestPointsPlaceholders extends PlaceholderExpansion {
 	public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
 		if (params.equals("player")) {
 			if (player == null || !player.isOnline()) return "§cerror: offline";
-			PlayerAccount account = PlayersManager.getPlayerAccount(player.getPlayer());
-			if (account == null)
+			Quester quester = PlayersManager.getPlayerAccount(player.getPlayer());
+			if (quester == null)
 				return "§cerror: cannot find account of " + player.getPlayer().getName();
-			return Integer.toString(points.getPoints(account));
+			return Integer.toString(points.getPoints(quester));
 		}
 
 		Matcher matcher = TOP_PATTERN.matcher(params);
@@ -92,5 +92,5 @@ public class QuestPointsPlaceholders extends PlaceholderExpansion {
 		}
 		return null;
 	}
-	
+
 }

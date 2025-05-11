@@ -1,10 +1,26 @@
 package fr.skytasul.quests.expansion.stages;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+import com.cryptomorin.xseries.XMaterial;
+import fr.skytasul.quests.api.QuestsPlugin;
+import fr.skytasul.quests.api.editors.TextEditor;
+import fr.skytasul.quests.api.editors.parsers.NumberParser;
+import fr.skytasul.quests.api.gui.ItemUtils;
+import fr.skytasul.quests.api.gui.close.CloseBehavior;
+import fr.skytasul.quests.api.gui.close.DelayCloseBehavior;
+import fr.skytasul.quests.api.gui.templates.PagedGUI;
+import fr.skytasul.quests.api.options.QuestOption;
+import fr.skytasul.quests.api.players.PlayerQuester;
+import fr.skytasul.quests.api.questers.Quester;
+import fr.skytasul.quests.api.stages.AbstractStage;
+import fr.skytasul.quests.api.stages.StageController;
+import fr.skytasul.quests.api.stages.StageDescriptionPlaceholdersContext;
+import fr.skytasul.quests.api.stages.creation.StageCreation;
+import fr.skytasul.quests.api.stages.creation.StageCreationContext;
+import fr.skytasul.quests.api.utils.ComparisonMethod;
+import fr.skytasul.quests.api.utils.messaging.PlaceholderRegistry;
+import fr.skytasul.quests.api.utils.messaging.PlaceholdersContext.PlayerPlaceholdersContext;
+import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
+import fr.skytasul.quests.expansion.utils.LangExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -17,27 +33,11 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import fr.skytasul.quests.api.QuestsPlugin;
-import fr.skytasul.quests.api.editors.TextEditor;
-import fr.skytasul.quests.api.editors.parsers.NumberParser;
-import fr.skytasul.quests.api.gui.ItemUtils;
-import fr.skytasul.quests.api.gui.close.CloseBehavior;
-import fr.skytasul.quests.api.gui.close.DelayCloseBehavior;
-import fr.skytasul.quests.api.gui.templates.PagedGUI;
-import fr.skytasul.quests.api.options.QuestOption;
-import fr.skytasul.quests.api.players.PlayerAccount;
-import fr.skytasul.quests.api.players.PlayersManager;
-import fr.skytasul.quests.api.stages.AbstractStage;
-import fr.skytasul.quests.api.stages.StageController;
-import fr.skytasul.quests.api.stages.StageDescriptionPlaceholdersContext;
-import fr.skytasul.quests.api.stages.creation.StageCreation;
-import fr.skytasul.quests.api.stages.creation.StageCreationContext;
-import fr.skytasul.quests.api.utils.ComparisonMethod;
-import fr.skytasul.quests.api.utils.XMaterial;
-import fr.skytasul.quests.api.utils.messaging.PlaceholderRegistry;
-import fr.skytasul.quests.api.utils.messaging.PlaceholdersContext.PlayerPlaceholdersContext;
-import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
-import fr.skytasul.quests.expansion.utils.LangExpansion;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class StageStatistic extends AbstractStage {
 
@@ -104,10 +104,7 @@ public class StageStatistic extends AbstractStage {
 		placeholders.registerIndexed("statistic_type_name",
 				statistic.name() + (offsetName == null ? "" : "(" + offsetName + ")"));
 		placeholders.registerIndexedContextual("remaining_value", PlayerPlaceholdersContext.class,
-				context -> Integer.toString(
-						context.getPlayerAccount().isCurrent()
-						? limit - getPlayerTarget(context.getPlayerAccount().getPlayer())
-						: -1));
+				context -> Integer.toString(limit - getPlayerTarget(context.getActor(), context.getQuester())));
 		placeholders.registerIndexed("statistic_name", statistic.name());
 		placeholders.registerIndexed("type_name", offsetName);
 		placeholders.register("target_value", limit);
@@ -117,11 +114,11 @@ public class StageStatistic extends AbstractStage {
 		return offsetMaterial != null ? offsetMaterial.name() : (offsetEntity != null ? offsetEntity.name() : null);
 	}
 
-	private int getPlayerTarget(Player player) {
+	private int getPlayerTarget(Player player, Quester quester) {
 		int stat = getStatistic(player);
 
 		if (relative) {
-			Number initial = getData(PlayersManager.getPlayerAccount(player), "initial");
+			Integer initial = getData(quester, "initial", Integer.class);
 			if (initial != null) stat -= initial.intValue();
 		}
 
@@ -144,7 +141,10 @@ public class StageStatistic extends AbstractStage {
 		players.forEach(player -> {
 			if (!canUpdate(player)) return;
 
-			if (comparison.test(getPlayerTarget(player) - limit)) finishStage(player);
+			for (Quester quester : controller.getApplicableQuesters(player)) {
+				if (comparison.test(getPlayerTarget(player, quester) - limit))
+					controller.finishStage(quester);
+			}
 		});
 	}
 
@@ -163,42 +163,50 @@ public class StageStatistic extends AbstractStage {
 	}
 
 	@Override
-	public void initPlayerDatas(PlayerAccount acc, Map<String, Object> datas) {
-		super.initPlayerDatas(acc, datas);
+	public void initPlayerDatas(Quester quester, Map<String, Object> datas) {
+		super.initPlayerDatas(quester, datas);
 		if (relative) {
-			int stat;
-			if (acc.isCurrent()) {
-				stat = getStatistic(acc.getPlayer());
-			}else {
-				stat = 0;
-				BeautyQuestsExpansion.logger.warning("Trying to set initial statistic " + statistic.name() + " for account " + acc.debugName() + " but the player is offline, in " + toString());
+			int stat = 0;
+			if (quester instanceof PlayerQuester playerQuester) {
+				if (playerQuester.isOnline()) {
+					stat = getStatistic(playerQuester.getPlayer().get());
+				} else {
+					BeautyQuestsExpansion.logger.warningArgs(
+							"Trying to fetch initial statistic value for quester {0} that is offline (stage {1}).",
+							quester.getDetailedName());
+				}
+			} else {
+				BeautyQuestsExpansion.logger.warningArgs(
+						"Trying to fetch initial statistic value for quester {0} that is not an actual player (stage {1}).",
+						quester.getDetailedName(), controller);
 			}
+
 			datas.put("initial", stat);
 		}
 	}
 
 	@Override
-	public void joined(@NotNull Player player) {
-		super.joined(player);
+	public void joined(@NotNull Player player, @NotNull Quester quester) {
+		super.joined(player, quester);
 		players.add(player);
 	}
 
 	@Override
-	public void started(@NotNull PlayerAccount acc) {
-		super.started(acc);
-		if (acc.isCurrent()) players.add(acc.getPlayer());
-	}
-
-	@Override
-	public void left(@NotNull Player player) {
-		super.left(player);
+	public void left(@NotNull Player player, @NotNull Quester quester) {
+		super.left(player, quester);
 		players.remove(player);
 	}
 
 	@Override
-	public void ended(@NotNull PlayerAccount acc) {
-		super.ended(acc);
-		if (acc.isCurrent()) players.remove(acc.getPlayer());
+	public void started(@NotNull Quester quester) {
+		super.started(quester);
+		players.addAll(quester.getOnlinePlayers());
+	}
+
+	@Override
+	public void ended(@NotNull Quester quester) {
+		super.ended(quester);
+		players.removeAll(quester.getOnlinePlayers());
 	}
 
 	@Override

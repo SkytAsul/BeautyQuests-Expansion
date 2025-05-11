@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<beautyquests.version>1.0.5</beautyquests.version>
+		<beautyquests.version>2.0.0-SNAPSHOT</beautyquests.version>
 	</properties>
 
 	<developers>
@@ -70,6 +70,13 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<parameters>true</parameters> <!-- For commands -->
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -154,7 +161,7 @@
 		<dependency>
 			<groupId>me.clip</groupId>
 			<artifactId>placeholderapi</artifactId>
-			<version>2.11.2</version>
+			<version>2.11.5</version>
 			<scope>provided</scope>
 		</dependency>
 		

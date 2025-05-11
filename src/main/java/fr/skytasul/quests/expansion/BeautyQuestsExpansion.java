@@ -1,5 +1,8 @@
 package fr.skytasul.quests.expansion;
 
+import com.cryptomorin.xseries.XMaterial;
+import com.tchristofferson.configupdater.ConfigUpdater;
+import fr.skytasul.quests.BeautyQuests;
 import fr.skytasul.quests.api.QuestsAPI;
 import fr.skytasul.quests.api.QuestsPlugin;
 import fr.skytasul.quests.api.gui.ItemUtils;
@@ -7,20 +10,17 @@ import fr.skytasul.quests.api.localization.Locale;
 import fr.skytasul.quests.api.options.QuestOption;
 import fr.skytasul.quests.api.options.QuestOptionCreator;
 import fr.skytasul.quests.api.stages.StageType;
-import fr.skytasul.quests.api.utils.XMaterial;
 import fr.skytasul.quests.api.utils.logger.LoggerExpanded;
 import fr.skytasul.quests.expansion.api.tracking.TrackerRegistry;
 import fr.skytasul.quests.expansion.options.TimeLimitOption;
 import fr.skytasul.quests.expansion.points.QuestPointsManager;
 import fr.skytasul.quests.expansion.stages.StageStatistic;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
-import fr.skytasul.quests.utils.configupdater.ConfigUpdater;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Handler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,9 +43,10 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 	public void onLoad() {
 		instance = this;
 		try {
-			logger = new LoggerExpanded(getLogger(), QuestsPlugin.getPlugin().getLoggerExpanded().getHandler());
-			Handler loggerHandler = QuestsPlugin.getPlugin().getLoggerExpanded().getHandler().getSubhandler("Expansion");
-			if (loggerHandler != null) getLogger().addHandler(loggerHandler);
+			logger = new LoggerExpanded(getLogger());
+
+			if (BeautyQuests.getInstance().getLoggerHandler() != null)
+				getLogger().addHandler(BeautyQuests.getInstance().getLoggerHandler());
 		}catch (Throwable ex) {
 			getLogger().severe("Failed to inject custom loggers. This may be due to BeautyQuests being outdated.");
 		}
@@ -99,10 +100,11 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 			String revisionStr = matcher.group(3);
 			int revision = revisionStr == null ? 0 : Integer.parseInt(revisionStr);
 			String buildStr = matcher.group(4);
+			boolean useBuildNumber = false;
 
-			if (buildStr == null) {
+			if (!useBuildNumber || buildStr == null) {
 				// means it's a release: we must use the major/minor/revision numbers
-				return major >= 1 && revision >= 5;
+				return major >= 2 && revision >= 0;
 			} else {
 				// we have build number: it's easier to just use it instead of the version numbers
 				try {

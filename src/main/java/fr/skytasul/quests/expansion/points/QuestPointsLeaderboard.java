@@ -1,5 +1,12 @@
 package fr.skytasul.quests.expansion.points;
 
+import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
+import fr.skytasul.quests.expansion.utils.PlayerNameFetcher;
+import fr.skytasul.quests.questers.data.sql.SqlDataManager;
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,13 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
-import fr.skytasul.quests.players.AbstractPlayersManager;
-import fr.skytasul.quests.players.PlayersManagerDB;
 
 public class QuestPointsLeaderboard {
 
@@ -27,7 +27,7 @@ public class QuestPointsLeaderboard {
 	};
 
 	private QuestPointsManager pointsManager;
-	private PlayersManagerDB dbManager;
+	private SqlDataManager dbManager;
 
 	private BukkitTask refreshTask;
 	private Map<Integer, LeaderboardEntry> cachedEntries;
@@ -37,17 +37,17 @@ public class QuestPointsLeaderboard {
 	private final String fetchFirstStatement;
 	private final String fetchRankStatement;
 
-	public QuestPointsLeaderboard(QuestPointsManager pointsManager, PlayersManagerDB dbManager) {
+	public QuestPointsLeaderboard(QuestPointsManager pointsManager, SqlDataManager dbManager) {
 		this.pointsManager = pointsManager;
 		this.dbManager = dbManager;
 
 		fetchFirstStatement = "SELECT `player_uuid`, `" + pointsManager.pointsData.getColumnName() + "`"
-				+ " FROM " + dbManager.ACCOUNTS_TABLE
+				+ " FROM " + dbManager.getSqlHandler().ACCOUNTS_TABLE
 				+ " WHERE " + pointsManager.pointsData.getColumnName() + " > 0"
 				+ " ORDER BY `" + pointsManager.pointsData.getColumnName() + "` DESC"
 				+ " LIMIT %d";
 		fetchRankStatement = "SELECT `player_uuid`, `" + pointsManager.pointsData.getColumnName() + "`"
-				+ " FROM " + dbManager.ACCOUNTS_TABLE
+				+ " FROM " + dbManager.getSqlHandler().ACCOUNTS_TABLE
 				+ " WHERE " + pointsManager.pointsData.getColumnName() + " > 0"
 				+ " ORDER BY `" + pointsManager.pointsData.getColumnName() + "` DESC"
 				+ " LIMIT 1 OFFSET %d";
@@ -94,7 +94,7 @@ public class QuestPointsLeaderboard {
 
 	@Nullable
 	private Map<Integer, LeaderboardEntry> fetchFirst(int amount) {
-		try (Connection connection = dbManager.getDatabase().getConnection();
+		try (Connection connection = dbManager.getSqlHandler().getDatabase().getConnection();
 				Statement statement = connection.createStatement()) {
 			Map<Integer, LeaderboardEntry> entries = new HashMap<>();
 			ResultSet resultSet = statement.executeQuery(String.format(fetchFirstStatement, amount));
@@ -119,7 +119,7 @@ public class QuestPointsLeaderboard {
 
 	@Nullable
 	private LeaderboardEntry fetchRank(int rank) {
-		try (Connection connection = dbManager.getDatabase().getConnection();
+		try (Connection connection = dbManager.getSqlHandler().getDatabase().getConnection();
 				Statement statement = connection.createStatement()) {
 			ResultSet resultSet = statement.executeQuery(String.format(fetchRankStatement, rank - 1));
 			if (resultSet.next()) {
@@ -147,7 +147,7 @@ public class QuestPointsLeaderboard {
 
 		private void fetchName() {
 			name = "loading...";
-			name = AbstractPlayersManager.getPlayerName(uuid);
+			name = PlayerNameFetcher.getPlayerName(uuid);
 		}
 
 		@NotNull

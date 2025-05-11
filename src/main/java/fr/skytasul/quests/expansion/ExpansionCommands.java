@@ -1,13 +1,13 @@
 package fr.skytasul.quests.expansion;
 
-import java.util.StringJoiner;
-import fr.skytasul.quests.api.commands.revxrsal.annotation.Subcommand;
-import fr.skytasul.quests.api.commands.revxrsal.bukkit.BukkitCommandActor;
-import fr.skytasul.quests.api.commands.revxrsal.bukkit.annotation.CommandPermission;
-import fr.skytasul.quests.api.commands.revxrsal.orphan.OrphanCommand;
 import fr.skytasul.quests.api.utils.messaging.MessageType.DefaultMessageType;
 import fr.skytasul.quests.api.utils.messaging.MessageUtils;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
+import revxrsal.commands.annotation.Subcommand;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import revxrsal.commands.bukkit.annotation.CommandPermission;
+import revxrsal.commands.orphan.OrphanCommand;
+import java.util.StringJoiner;
 
 public class ExpansionCommands implements OrphanCommand {
 
@@ -20,7 +20,7 @@ public class ExpansionCommands implements OrphanCommand {
 		for (ExpansionFeature feature : BeautyQuestsExpansion.getInstance().getFeatures()) {
 			joiner.add("- " + feature.toString());
 		}
-		MessageUtils.sendMessage(actor.getSender(), joiner.toString(), DefaultMessageType.PREFIXED);
+		MessageUtils.sendMessage(actor.audience().get(), joiner.toString(), DefaultMessageType.PREFIXED);
 	}
 
 }

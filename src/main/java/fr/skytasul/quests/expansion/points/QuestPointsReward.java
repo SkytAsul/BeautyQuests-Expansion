@@ -1,19 +1,17 @@
 package fr.skytasul.quests.expansion.points;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import fr.skytasul.quests.api.editors.TextEditor;
 import fr.skytasul.quests.api.editors.parsers.NumberParser;
 import fr.skytasul.quests.api.objects.QuestObjectClickEvent;
-import fr.skytasul.quests.api.players.PlayersManager;
 import fr.skytasul.quests.api.rewards.AbstractReward;
+import fr.skytasul.quests.api.rewards.RewardGiveContext;
 import fr.skytasul.quests.api.utils.messaging.PlaceholderRegistry;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class QuestPointsReward extends AbstractReward {
 
@@ -29,11 +27,11 @@ public class QuestPointsReward extends AbstractReward {
 	}
 
 	@Override
-	public List<String> give(Player p) {
+	public void give(@NotNull RewardGiveContext context) {
 		try {
 			int points = min == max ? min : ThreadLocalRandom.current().nextInt(min, max + 1);
-			BeautyQuestsExpansion.getInstance().getPointsManager().addPoints(PlayersManager.getPlayerAccount(p), points);
-			return Arrays.asList(LangExpansion.Points_Amount.quickFormat("quest_points_amount", points));
+			BeautyQuestsExpansion.getInstance().getPointsManager().addPoints(context.getQuester(), points);
+			context.addEarning(LangExpansion.Points_Amount.quickFormat("quest_points_amount", points));
 		} catch (IllegalPointsBalanceException ex) {
 			throw new IllegalArgumentException(ex);
 		}

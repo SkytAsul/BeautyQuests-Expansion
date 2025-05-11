@@ -1,6 +1,6 @@
 package fr.skytasul.quests.expansion.api.tracking;
 
-import org.jetbrains.annotations.NotNull;
+import com.cryptomorin.xseries.XMaterial;
 import fr.skytasul.quests.api.QuestsAPI;
 import fr.skytasul.quests.api.QuestsPlugin;
 import fr.skytasul.quests.api.gui.ItemUtils;
@@ -14,11 +14,11 @@ import fr.skytasul.quests.api.stages.types.Locatable;
 import fr.skytasul.quests.api.stages.types.Locatable.LocatedType;
 import fr.skytasul.quests.api.utils.IntegrationManager.BQDependency;
 import fr.skytasul.quests.api.utils.MinecraftVersion;
-import fr.skytasul.quests.api.utils.XMaterial;
 import fr.skytasul.quests.expansion.options.TrackingOption;
 import fr.skytasul.quests.expansion.tracking.*;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
 import fr.skytasul.quests.integrations.worldguard.StageArea;
+import org.jetbrains.annotations.NotNull;
 
 public class TrackerRegistry extends QuestObjectsRegistry<Tracker, TrackerCreator> {
 
