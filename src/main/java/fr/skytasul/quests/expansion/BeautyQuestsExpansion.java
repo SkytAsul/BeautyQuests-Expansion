@@ -4,7 +4,6 @@ import com.cryptomorin.xseries.XMaterial;
 import com.tchristofferson.configupdater.ConfigUpdater;
 import fr.skytasul.quests.BeautyQuests;
 import fr.skytasul.quests.api.QuestsAPI;
-import fr.skytasul.quests.api.QuestsPlugin;
 import fr.skytasul.quests.api.gui.ItemUtils;
 import fr.skytasul.quests.api.localization.Locale;
 import fr.skytasul.quests.api.options.QuestOption;
@@ -35,6 +34,8 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 	private List<ExpansionFeature> features = new ArrayList<>();
 
+	private BeautyQuests beautyQuests;
+
 	private ExpansionConfiguration config;
 	private TrackerRegistry trackersRegistry;
 	private QuestPointsManager pointsManager;
@@ -45,8 +46,10 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 		try {
 			logger = new LoggerExpanded(getLogger());
 
-			if (BeautyQuests.getInstance().getLoggerHandler() != null)
-				getLogger().addHandler(BeautyQuests.getInstance().getLoggerHandler());
+			beautyQuests = BeautyQuests.getInstance();
+
+			if (beautyQuests.getLoggerHandler() != null)
+				getLogger().addHandler(beautyQuests.getLoggerHandler());
 		}catch (Throwable ex) {
 			getLogger().severe("Failed to inject custom loggers. This may be due to BeautyQuests being outdated.");
 		}
@@ -58,7 +61,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 			logger.info("------- BeautyQuests Expansion -------");
 			logger.info("Thank you for purchasing the expansion!");
 
-			if (!QuestsPlugin.getPlugin().isEnabled())
+			if (!beautyQuests.isEnabled())
 				throw new LoadingException("BeautyQuests has not been properly loaded.");
 
 			if (!isBQUpToDate())
@@ -82,7 +85,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 	}
 
 	private void registerCommands() {
-		QuestsPlugin.getPlugin().getCommand().registerCommands("", new ExpansionCommands());
+		beautyQuests.getCommand().registerCommands("", new ExpansionCommands());
 	}
 
 	@Override
@@ -93,7 +96,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 	@SuppressWarnings("unused") // because we don't always use major, minor and revision at the same time
 	private boolean isBQUpToDate() {
 		Pattern bqVersion = Pattern.compile("(\\d+)\\.(\\d+)(?>\\.(\\d+))?(?>\\+build\\.(.+))?");
-		Matcher matcher = bqVersion.matcher(QuestsPlugin.getPlugin().getDescription().getVersion());
+		Matcher matcher = bqVersion.matcher(beautyQuests.getDescription().getVersion());
 		if (matcher.find()) {
 			int major = Integer.parseInt(matcher.group(1));
 			int minor = Integer.parseInt(matcher.group(2));
@@ -172,7 +175,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 		features.add(new ExpansionFeature(
 				LangExpansion.Points_Name.toString(),
 				LangExpansion.Points_Description.toString(),
-				() -> pointsManager = new QuestPointsManager(config.getPointsConfig()),
+				() -> pointsManager = new QuestPointsManager(config.getPointsConfig(), beautyQuests),
                 () -> pointsManager.unload())); // cannot use pointsManager::unload here as the field is not yet initialized
 	}
 

@@ -94,7 +94,7 @@ public class TimeLimitOption extends QuestOption<Integer> implements Listener, Q
 	private OptionalLong getRemainingTime(@NotNull Quester quester) {
 		Optional<QuesterQuestData> data = quester.getDataHolder().getQuestDataIfPresent(getAttachedQuest());
 		if (data.isEmpty()) {
-			BeautyQuestsExpansion.logger.warningArgs("Cannot find data of {0} for quest {1}",
+			BeautyQuestsExpansion.logger.warning("Cannot find data of {0} for quest {1}",
 					quester.getDetailedName(), getAttachedQuest().getId());
 			return OptionalLong.empty();
 		}

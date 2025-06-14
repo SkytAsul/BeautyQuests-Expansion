@@ -1,9 +1,10 @@
 package fr.skytasul.quests.expansion.points;
 
+import fr.skytasul.quests.api.players.PlayerManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import fr.skytasul.quests.api.players.PlayersManager;
+import org.jetbrains.annotations.NotNull;
 import sh.okx.rankup.RankupPlugin;
 import sh.okx.rankup.events.RankupRegisterEvent;
 import sh.okx.rankup.requirements.DeductibleRequirement;
@@ -12,10 +13,12 @@ import sh.okx.rankup.requirements.Requirement;
 
 public class QuestPointsRankup implements Listener {
 
-	private final QuestPointsManager manager;
+	private final @NotNull QuestPointsManager manager;
+	private final @NotNull PlayerManager playerManager;
 
-	public QuestPointsRankup(QuestPointsManager manager) {
+	public QuestPointsRankup(QuestPointsManager manager, @NotNull PlayerManager playerManager) {
 		this.manager = manager;
+		this.playerManager = playerManager;
 	}
 
 	@EventHandler
@@ -36,7 +39,7 @@ public class QuestPointsRankup implements Listener {
 
 		@Override
 		public double getProgress(Player player) {
-			return manager.getPoints(PlayersManager.getPlayerAccount(player));
+			return manager.getPoints(PlayerManager.getPlayerAccount(player));
 		}
 
 		@Override
@@ -60,7 +63,7 @@ public class QuestPointsRankup implements Listener {
 		@Override
 		public void apply(Player player, double multiplier) {
 			try {
-				manager.addPoints(PlayersManager.getPlayerAccount(player), -getValueInt() * (int) multiplier);
+				manager.addPoints(playerManager.getQuester(player), -getValueInt() * (int) multiplier);
 			} catch (IllegalPointsBalanceException ex) {
 				throw new IllegalArgumentException(ex);
 			}

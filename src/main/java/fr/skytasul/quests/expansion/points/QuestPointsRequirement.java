@@ -1,7 +1,7 @@
 package fr.skytasul.quests.expansion.points;
 
 import org.bukkit.entity.Player;
-import fr.skytasul.quests.api.players.PlayersManager;
+import fr.skytasul.quests.api.players.PlayerManager;
 import fr.skytasul.quests.api.requirements.AbstractRequirement;
 import fr.skytasul.quests.api.requirements.TargetNumberRequirement;
 import fr.skytasul.quests.api.utils.ComparisonMethod;
@@ -21,7 +21,7 @@ public class QuestPointsRequirement extends TargetNumberRequirement {
 
 	@Override
 	public double getPlayerTarget(Player p) {
-		return BeautyQuestsExpansion.getInstance().getPointsManager().getPoints(PlayersManager.getPlayerAccount(p));
+		return BeautyQuestsExpansion.getInstance().getPointsManager().getPoints(PlayerManager.getPlayerAccount(p));
 	}
 
 	@Override

@@ -42,12 +42,12 @@ public class QuestPointsLeaderboard {
 		this.dbManager = dbManager;
 
 		fetchFirstStatement = "SELECT `player_uuid`, `" + pointsManager.pointsData.getColumnName() + "`"
-				+ " FROM " + dbManager.getSqlHandler().ACCOUNTS_TABLE
+				+ " FROM " + dbManager.getSqlHandler().QUESTERS_TABLE
 				+ " WHERE " + pointsManager.pointsData.getColumnName() + " > 0"
 				+ " ORDER BY `" + pointsManager.pointsData.getColumnName() + "` DESC"
 				+ " LIMIT %d";
 		fetchRankStatement = "SELECT `player_uuid`, `" + pointsManager.pointsData.getColumnName() + "`"
-				+ " FROM " + dbManager.getSqlHandler().ACCOUNTS_TABLE
+				+ " FROM " + dbManager.getSqlHandler().QUESTERS_TABLE
 				+ " WHERE " + pointsManager.pointsData.getColumnName() + " > 0"
 				+ " ORDER BY `" + pointsManager.pointsData.getColumnName() + "` DESC"
 				+ " LIMIT 1 OFFSET %d";

@@ -171,12 +171,12 @@ public class StageStatistic extends AbstractStage {
 				if (playerQuester.isOnline()) {
 					stat = getStatistic(playerQuester.getPlayer().get());
 				} else {
-					BeautyQuestsExpansion.logger.warningArgs(
+					BeautyQuestsExpansion.logger.warning(
 							"Trying to fetch initial statistic value for quester {0} that is offline (stage {1}).",
 							quester.getDetailedName());
 				}
 			} else {
-				BeautyQuestsExpansion.logger.warningArgs(
+				BeautyQuestsExpansion.logger.warning(
 						"Trying to fetch initial statistic value for quester {0} that is not an actual player (stage {1}).",
 						quester.getDetailedName(), controller);
 			}
