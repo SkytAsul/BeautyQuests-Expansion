@@ -44,7 +44,7 @@ public class QuestPointsManager implements OrphanCommand {
 		plugin.getAPI().getQuesterManager().addSavableData(pointsData);
 
 		if (plugin.getQuesterManager().getDataManager() instanceof SqlDataManager sqlDataManager) {
-			leaderboard = new QuestPointsLeaderboard(this, sqlDataManager);
+			leaderboard = new QuestPointsLeaderboard(this, sqlDataManager, plugin.getQuesterManager());
 		} else {
 			BeautyQuestsExpansion.logger.warning(
 					"You are not using a database to save BeautyQuests datas. Quest points leaderboard is disabled.");

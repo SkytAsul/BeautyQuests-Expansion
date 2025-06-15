@@ -1,8 +1,10 @@
 package fr.skytasul.quests.expansion.points;
 
+import fr.skytasul.quests.api.questers.QuesterManager;
+import fr.skytasul.quests.api.utils.logger.LoggerExpanded;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
-import fr.skytasul.quests.expansion.utils.PlayerNameFetcher;
 import fr.skytasul.quests.questers.data.sql.SqlDataManager;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -13,44 +15,40 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
 
 public class QuestPointsLeaderboard {
 
-	private static final long CACHE_TIME_TICKS = 40 * 20;
-	private static final LeaderboardEntry LOADING_ENTRY = new LeaderboardEntry(null, 0) {
-		@Override
-		public String getName() {
-			return "§cloading...";
-		}
-	};
+	private static final LoggerExpanded LOGGER = LoggerExpanded.get("BeautyQuests-Expansion.QuestPointsLeaderboard");
 
-	private QuestPointsManager pointsManager;
-	private SqlDataManager dbManager;
+	private static final long CACHE_TIME_TICKS = 40 * 20;
+	private static final LeaderboardEntry LOADING_ENTRY = new LeaderboardEntry("loading...", 0);
+
+	private final QuestPointsManager pointsManager;
+	private final SqlDataManager dbManager;
+	private final QuesterManager questerManager;
 
 	private BukkitTask refreshTask;
 	private Map<Integer, LeaderboardEntry> cachedEntries;
 
 	private int maxRankFetched;
 
-	private final String fetchFirstStatement;
-	private final String fetchRankStatement;
-
-	public QuestPointsLeaderboard(QuestPointsManager pointsManager, SqlDataManager dbManager) {
+	public QuestPointsLeaderboard(QuestPointsManager pointsManager, SqlDataManager dbManager,
+			QuesterManager questerManager) {
 		this.pointsManager = pointsManager;
 		this.dbManager = dbManager;
+		this.questerManager = questerManager;
+	}
 
-		fetchFirstStatement = "SELECT `player_uuid`, `" + pointsManager.pointsData.getColumnName() + "`"
-				+ " FROM " + dbManager.getSqlHandler().QUESTERS_TABLE
-				+ " WHERE " + pointsManager.pointsData.getColumnName() + " > 0"
-				+ " ORDER BY `" + pointsManager.pointsData.getColumnName() + "` DESC"
-				+ " LIMIT %d";
-		fetchRankStatement = "SELECT `player_uuid`, `" + pointsManager.pointsData.getColumnName() + "`"
-				+ " FROM " + dbManager.getSqlHandler().QUESTERS_TABLE
-				+ " WHERE " + pointsManager.pointsData.getColumnName() + " > 0"
-				+ " ORDER BY `" + pointsManager.pointsData.getColumnName() + "` DESC"
-				+ " LIMIT 1 OFFSET %d";
+	private String getFetchStatement(int amount, int offset) {
+		String pointsColumn = pointsManager.pointsData.getColumnName();
+		return """
+				SELECT `provider`, `identifier`, `%s`
+				FROM %s
+				WHERE %s > 0
+				ORDER BY `%s` DESC
+				LIMIT %d OFFSET %d
+				""".formatted(pointsColumn, dbManager.getSqlHandler().QUESTERS_TABLE, pointsColumn, pointsColumn, amount,
+				offset);
 	}
 
 	private void launchRefreshTask() {
@@ -59,7 +57,6 @@ public class QuestPointsLeaderboard {
 			if (firstEntries == null)
 				return;
 			cachedEntries = firstEntries;
-			cachedEntries.values().stream().filter(Objects::nonNull).forEach(LeaderboardEntry::fetchName);
 		}, 20L, CACHE_TIME_TICKS);
 
 		// we have a 20 ticks delay to wait for the "maxRankFetched" field
@@ -92,17 +89,30 @@ public class QuestPointsLeaderboard {
 		return cachedEntries.get(rank);
 	}
 
+	private LeaderboardEntry getEntryFromRow(ResultSet resultSet) throws SQLException {
+		String provider = resultSet.getString("provider");
+		String identifier = resultSet.getString("identifier");
+		int points = resultSet.getInt(pointsManager.pointsData.getColumnName());
+
+		String name = "unknown";
+		try {
+			name = questerManager.getQuesterProvider(Key.key(provider)).getQuesterName(identifier).orElse("unknown");
+		} catch (IllegalArgumentException ex) {
+			LOGGER.warning("Failed to fetch quester {0} provider {1}", ex, identifier, provider);
+		}
+
+		return new LeaderboardEntry(name, points);
+	}
+
 	@Nullable
 	private Map<Integer, LeaderboardEntry> fetchFirst(int amount) {
 		try (Connection connection = dbManager.getSqlHandler().getDatabase().getConnection();
 				Statement statement = connection.createStatement()) {
 			Map<Integer, LeaderboardEntry> entries = new HashMap<>();
-			ResultSet resultSet = statement.executeQuery(String.format(fetchFirstStatement, amount));
+			ResultSet resultSet = statement.executeQuery(getFetchStatement(amount, 0));
 			int index = 1;
 			while (resultSet.next()) {
-				UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
-				int points = resultSet.getInt(pointsManager.pointsData.getColumnName());
-				entries.put(index, new LeaderboardEntry(uuid, points));
+				entries.put(index, getEntryFromRow(resultSet));
 				index++;
 			}
 
@@ -112,7 +122,7 @@ public class QuestPointsLeaderboard {
 
 			return entries;
 		} catch (SQLException ex) {
-			BeautyQuestsExpansion.logger.severe("An exception occurred while trying to fetch points leaderboard", ex);
+			LOGGER.severe("An exception occurred while trying to fetch leaderboard", ex);
 			return null;
 		}
 	}
@@ -121,44 +131,16 @@ public class QuestPointsLeaderboard {
 	private LeaderboardEntry fetchRank(int rank) {
 		try (Connection connection = dbManager.getSqlHandler().getDatabase().getConnection();
 				Statement statement = connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery(String.format(fetchRankStatement, rank - 1));
-			if (resultSet.next()) {
-				UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
-				int points = resultSet.getInt(pointsManager.pointsData.getColumnName());
-				return new LeaderboardEntry(uuid, points);
-			}
+			ResultSet resultSet = statement.executeQuery(getFetchStatement(1, rank - 1));
+			if (resultSet.next())
+				return getEntryFromRow(resultSet);
 		} catch (SQLException ex) {
-			BeautyQuestsExpansion.logger.severe("An exception occurred while trying to fetch points for rank " + rank, ex);
+			LOGGER.severe("An exception occurred while trying to fetch points for rank " + rank, ex);
 		}
 		return null;
 	}
 
-	public static class LeaderboardEntry {
-
-		private final UUID uuid;
-		private final int points;
-
-		private String name;
-
-		public LeaderboardEntry(UUID uuid, int points) {
-			this.uuid = uuid;
-			this.points = points;
-		}
-
-		private void fetchName() {
-			name = "loading...";
-			name = PlayerNameFetcher.getPlayerName(uuid);
-		}
-
-		@NotNull
-		public String getName() {
-			return name == null ? "unknown" : name;
-		}
-
-		public int getPoints() {
-			return points;
-		}
-
+	public static record LeaderboardEntry(@NotNull String name, int points) {
 	}
 
 }

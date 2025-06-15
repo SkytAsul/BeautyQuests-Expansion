@@ -76,15 +76,18 @@ public class QuestPointsPlaceholders extends PlaceholderExpansion {
 				return "§cerror: need database";
 			} else {
 				int rank = Integer.parseInt(matcher.group(1));
+				if (rank < 1)
+					return "Cannot find rank " + rank;
+
 				LeaderboardEntry entry = points.getLeaderboard().getPlayer(rank);
 				if (entry == null)
 					return "";
 
 				switch (matcher.group(2)) {
 					case "name":
-						return entry.getName();
+						return entry.name();
 					case "points":
-						return Integer.toString(entry.getPoints());
+						return Integer.toString(entry.points());
 					default:
 						throw new IllegalArgumentException("Impossible");
 				}
