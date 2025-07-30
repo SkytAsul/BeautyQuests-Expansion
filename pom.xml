@@ -66,6 +66,10 @@
 									<pattern>fr.skytasul.reflection</pattern>
 									<shadedPattern>fr.skytasul.quests.expansion.utils.reflection</shadedPattern>
 								</relocation>
+								<relocation>
+									<pattern>com.tchristofferson.configupdater</pattern>
+									<shadedPattern>fr.skytasul.quests.expansion.utils.configupdater</shadedPattern>
+								</relocation>
 							</relocations>
 						</configuration>
 					</execution>
@@ -134,7 +138,7 @@
 		<dependency>
 			<groupId>fr.skytasul</groupId>
 			<artifactId>glowingentities</artifactId>
-			<version>1.4.3</version>
+			<version>1.4.6</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -164,7 +168,15 @@
 			<version>2.11.5</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
+		<!-- Libraries in BQ but relocated damn idk how to handle that-->
+		<dependency>
+			<groupId>com.tchristofferson</groupId>
+			<artifactId>ConfigUpdater</artifactId>
+			<version>2.2-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- Local JARs -->
 		<dependency>
 			<groupId>com.live.bemmamin</groupId>

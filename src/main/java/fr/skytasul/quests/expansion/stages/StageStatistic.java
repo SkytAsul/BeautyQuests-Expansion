@@ -168,7 +168,7 @@ public class StageStatistic extends AbstractStage {
 		if (relative) {
 			int stat = 0;
 			if (quester instanceof PlayerQuester playerQuester) {
-				if (playerQuester.isOnline()) {
+				if (playerQuester.isActive()) {
 					stat = getStatistic(playerQuester.getPlayer().get());
 				} else {
 					BeautyQuestsExpansion.logger.warning(

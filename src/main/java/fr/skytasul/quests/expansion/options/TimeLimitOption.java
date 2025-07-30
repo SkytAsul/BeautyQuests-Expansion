@@ -9,7 +9,7 @@ import fr.skytasul.quests.api.options.QuestOption;
 import fr.skytasul.quests.api.options.description.QuestDescriptionContext;
 import fr.skytasul.quests.api.options.description.QuestDescriptionProvider;
 import fr.skytasul.quests.api.questers.Quester;
-import fr.skytasul.quests.api.questers.QuesterQuestData;
+import fr.skytasul.quests.api.questers.data.QuesterQuestData;
 import fr.skytasul.quests.api.questers.events.QuesterJoinEvent;
 import fr.skytasul.quests.api.questers.events.QuesterLeaveEvent;
 import fr.skytasul.quests.api.quests.Quest;
@@ -113,10 +113,10 @@ public class TimeLimitOption extends QuestOption<Integer> implements Listener, Q
 		if (timeToWait.isEmpty()) {
 			return;
 		} else if (timeToWait.getAsLong() <= 0) {
-			QuestUtils.runSync(() -> getAttachedQuest().cancelPlayer(quester));
+			QuestUtils.runSync(() -> getAttachedQuest().cancelQuester(quester));
 		}else {
 			tasks.put(quester, Bukkit.getScheduler().runTaskLater(BeautyQuestsExpansion.getInstance(),
-					() -> getAttachedQuest().cancelPlayer(quester), timeToWait.getAsLong() / 50));
+					() -> getAttachedQuest().cancelQuester(quester), timeToWait.getAsLong() / 50));
 		}
 	}
 
