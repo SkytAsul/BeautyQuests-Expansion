@@ -8,11 +8,14 @@ import fr.skytasul.quests.api.gui.ItemUtils;
 import fr.skytasul.quests.api.localization.Locale;
 import fr.skytasul.quests.api.options.QuestOption;
 import fr.skytasul.quests.api.options.QuestOptionCreator;
+import fr.skytasul.quests.api.quests.quester.QuestQuesterStrategyCreator;
 import fr.skytasul.quests.api.stages.StageType;
 import fr.skytasul.quests.api.utils.logger.LoggerExpanded;
 import fr.skytasul.quests.expansion.api.tracking.TrackerRegistry;
 import fr.skytasul.quests.expansion.options.TimeLimitOption;
 import fr.skytasul.quests.expansion.points.QuestPointsManager;
+import fr.skytasul.quests.expansion.questers.server.ServerQuesterProvider;
+import fr.skytasul.quests.expansion.questers.server.ServerQuesterStrategy;
 import fr.skytasul.quests.expansion.stages.StageStatistic;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -177,6 +180,18 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 				LangExpansion.Points_Description.toString(),
 				() -> pointsManager = new QuestPointsManager(config.getPointsConfig(), beautyQuests),
                 () -> pointsManager.unload())); // cannot use pointsManager::unload here as the field is not yet initialized
+		features.add(new ExpansionFeature(
+				LangExpansion.Quester_Server_Name.toString(),
+				LangExpansion.Quester_Server_Description.toString(),
+				() -> {
+					var questerProvider = new ServerQuesterProvider();
+					QuestsAPI.getAPI().getQuesterManager().registerQuesterProvider(questerProvider);
+					QuestsAPI.getAPI().getQuestQuesterStrategyRegistry().register(new QuestQuesterStrategyCreator("server",
+							ServerQuesterStrategy.class, () -> new ServerQuesterStrategy(questerProvider),
+							LangExpansion.Quester_Server_Name.toString(),
+							LangExpansion.Quester_Server_Description.toString()));
+				},
+				null));
 	}
 
 	private void loadFeatures() {

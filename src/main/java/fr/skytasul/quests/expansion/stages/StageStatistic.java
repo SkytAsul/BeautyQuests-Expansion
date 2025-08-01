@@ -139,7 +139,7 @@ public class StageStatistic extends AbstractStage {
 
 	protected void refresh() {
 		players.forEach(player -> {
-			if (!canUpdate(player)) return;
+			if (!matchesRequirements(player)) return;
 
 			for (Quester quester : controller.getApplicableQuesters(player)) {
 				if (comparison.test(getPlayerTarget(player, quester) - limit))

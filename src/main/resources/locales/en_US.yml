@@ -80,3 +80,8 @@ points:
     balance: §aYou have §l{quest_points_balance}§a quest points!
     balancePlayer: '§a{target_name}''s balance: {quest_points_balance} quest points.'
     added: 'Added {quest_points_balance} quests points to {target_name}''s balance.'
+quester:
+  server:
+    name: Server quester
+    description: The progress of the quest will be shared between all players in the server.
+    tooltip: §dWhole server quest!

@@ -1,10 +1,10 @@
 package fr.skytasul.quests.expansion.utils;
 
-import org.jetbrains.annotations.NotNull;
 import fr.skytasul.quests.api.localization.Lang;
 import fr.skytasul.quests.api.localization.Locale;
 import fr.skytasul.quests.api.utils.messaging.MessageType;
 import fr.skytasul.quests.api.utils.messaging.MessageType.DefaultMessageType;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("squid:S115")
 public enum LangExpansion implements Locale {
@@ -63,6 +63,10 @@ public enum LangExpansion implements Locale {
 	Points_Command_Balance("points.command.balance"), // 0: points
 	Points_Command_Balance_Player("points.command.balancePlayer"), // 0: points, 1: player
 	Points_Command_Added("points.command.added", Lang.SuccessPrefix), // 0: points, 1: player
+
+	Quester_Server_Name("quester.server.name"),
+	Quester_Server_Description("quester.server.description"),
+	Quester_Server_Tooltip("quester.server.tooltip"),
 
 	;
 
