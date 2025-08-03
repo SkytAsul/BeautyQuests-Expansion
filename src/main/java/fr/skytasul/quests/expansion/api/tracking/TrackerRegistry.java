@@ -30,10 +30,14 @@ public class TrackerRegistry extends QuestObjectsRegistry<Tracker, TrackerCreato
 	}
 
 	private void registerTrackers() {
-		if (MinecraftVersion.MAJOR > 8)
-			register(new TrackerCreator("particles", ParticleTracker.class, ItemUtils.item(XMaterial.SPLASH_POTION, LangExpansion.Tracking_Particles_Name.toString(), QuestOption.formatDescription(LangExpansion.Tracking_Particles_Description.toString())), ParticleTracker::new));
-		if (MinecraftVersion.MAJOR >= 17)
-			register(new TrackerCreator("block-outline", BlockOutlineTracker.class, ItemUtils.item(XMaterial.ACACIA_STAIRS, LangExpansion.Tracking_Outline_Block_Name.toString(), QuestOption.formatDescription(LangExpansion.Tracking_Outline_Block_Description.toString())), BlockOutlineTracker::new, type -> Locatable.hasLocatedTypes(type.getStageClass(), LocatedType.BLOCK)));
+		register(new TrackerCreator("particles", ParticleTracker.class,
+				ItemUtils.item(XMaterial.SPLASH_POTION, LangExpansion.Tracking_Particles_Name.toString(),
+						QuestOption.formatDescription(LangExpansion.Tracking_Particles_Description.toString())),
+				ParticleTracker::new));
+		register(new TrackerCreator("block-outline", BlockOutlineTracker.class,
+				ItemUtils.item(XMaterial.ACACIA_STAIRS, LangExpansion.Tracking_Outline_Block_Name.toString(),
+						QuestOption.formatDescription(LangExpansion.Tracking_Outline_Block_Description.toString())),
+				BlockOutlineTracker::new, type -> Locatable.hasLocatedTypes(type.getStageClass(), LocatedType.BLOCK)));
 		if (MinecraftVersion.MAJOR >= 17)
 			register(new TrackerCreator("glowing", GlowingTracker.class,
 					ItemUtils.item(XMaterial.SPECTRAL_ARROW, LangExpansion.Tracking_Glowing_Name.toString(),

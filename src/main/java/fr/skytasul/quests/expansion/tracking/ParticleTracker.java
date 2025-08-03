@@ -1,22 +1,21 @@
 package fr.skytasul.quests.expansion.tracking;
 
+import fr.skytasul.quests.api.gui.LoreBuilder;
+import fr.skytasul.quests.api.objects.QuestObjectClickEvent;
+import fr.skytasul.quests.api.stages.types.Locatable;
+import fr.skytasul.quests.api.stages.types.Locatable.Located;
+import fr.skytasul.quests.api.stages.types.Locatable.MultipleLocatable.NearbyFetcher;
+import fr.skytasul.quests.expansion.api.tracking.Tracker;
+import fr.skytasul.quests.expansion.utils.ShapesAnalysis;
+import fr.skytasul.quests.gui.particles.ParticleEffectGUI;
+import fr.skytasul.quests.utils.ParticleEffect;
+import fr.skytasul.quests.utils.ParticleEffect.ParticleShape;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import fr.skytasul.quests.api.gui.LoreBuilder;
-import fr.skytasul.quests.api.objects.QuestObjectClickEvent;
-import fr.skytasul.quests.api.stages.types.Locatable;
-import fr.skytasul.quests.api.stages.types.Locatable.Located;
-import fr.skytasul.quests.api.stages.types.Locatable.MultipleLocatable.NearbyFetcher;
-import fr.skytasul.quests.api.utils.MinecraftVersion;
-import fr.skytasul.quests.expansion.api.tracking.Tracker;
-import fr.skytasul.quests.expansion.utils.ShapesAnalysis;
-import fr.skytasul.quests.gui.particles.ParticleEffectGUI;
-import fr.skytasul.quests.utils.ParticleEffect;
-import fr.skytasul.quests.utils.ParticleEffect.ParticleShape;
 
 public class ParticleTracker extends AbstractTaskFetcherTracker {
 
@@ -70,13 +69,8 @@ public class ParticleTracker extends AbstractTaskFetcherTracker {
 			Block block = ((Locatable.Located.LocatedBlock) located).getBlockNullable();
 			if (block == null)
 				return;
-			if (MinecraftVersion.MAJOR >= 17) {
-				bottom = ShapesAnalysis.getBlockBottom(block);
-				height = ShapesAnalysis.getBlockHeight(block);
-			}else {
-				bottom = block.getLocation().add(0.5, 0, 0.5);
-				height = 1;
-			}
+			bottom = ShapesAnalysis.getBlockBottom(block);
+			height = ShapesAnalysis.getBlockHeight(block);
 		}else {
 			bottom = located.getLocation();
 			height = 0;
