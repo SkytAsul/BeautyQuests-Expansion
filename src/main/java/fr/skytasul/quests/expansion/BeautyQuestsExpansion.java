@@ -10,8 +10,10 @@ import fr.skytasul.quests.api.options.QuestOption;
 import fr.skytasul.quests.api.options.QuestOptionCreator;
 import fr.skytasul.quests.api.quests.quester.QuestQuesterStrategyCreator;
 import fr.skytasul.quests.api.stages.StageType;
+import fr.skytasul.quests.api.utils.IntegrationManager.BQDependency;
 import fr.skytasul.quests.api.utils.logger.LoggerExpanded;
 import fr.skytasul.quests.expansion.api.tracking.TrackerRegistry;
+import fr.skytasul.quests.expansion.options.PartyProgressStageOption;
 import fr.skytasul.quests.expansion.options.TimeLimitOption;
 import fr.skytasul.quests.expansion.points.QuestPointsManager;
 import fr.skytasul.quests.expansion.questers.server.ServerQuesterProvider;
@@ -149,49 +151,84 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 	private void addDefaultFeatures() {
 		features.add(new ExpansionFeature(
 				LangExpansion.Tracking_Name.toString(),
-				LangExpansion.Tracking_Description.toString(),
-				() -> trackersRegistry = new TrackerRegistry(),
-				null) {
+				LangExpansion.Tracking_Description.toString()) {
 			@Override
 			public String getDescription() {
 				return LangExpansion.Tracking_Description.quickFormat("trackers_amount",
 						trackersRegistry == null ? "x" : trackersRegistry.getCreators().size());
 			}
+
+			@Override
+			public void onLoad() {
+				trackersRegistry = new TrackerRegistry();
+			}
 		});
 		features.add(new ExpansionFeature(
 				LangExpansion.TimeLimit_Name.toString(),
-				LangExpansion.TimeLimit_Description.toString(),
-				() -> QuestsAPI.getAPI().registerQuestOption(
-						new QuestOptionCreator<>("timeLimit", 42, TimeLimitOption.class, TimeLimitOption::new, 0)),
-				null));
+				LangExpansion.TimeLimit_Description.toString()) {
+			@Override
+			public void onLoad() {
+				QuestsAPI.getAPI().registerQuestOption(
+						new QuestOptionCreator<>("timeLimit", 42, TimeLimitOption.class, TimeLimitOption::new, 0));
+			}
+		});
 		features.add(new ExpansionFeature(
 				LangExpansion.Stage_Statistic_Name.toString(),
-				LangExpansion.Stage_Statistic_Description.toString(),
-				() -> QuestsAPI.getAPI().getStages().register(new StageType<>(
+				LangExpansion.Stage_Statistic_Description.toString()) {
+			@Override
+			public void onLoad() {
+				QuestsAPI.getAPI().getStages().register(new StageType<>(
 						"statistic",
 						StageStatistic.class,
 						LangExpansion.Stage_Statistic_Name.toString(),
 						StageStatistic::deserialize,
-						ItemUtils.item(XMaterial.FEATHER, "§a" + LangExpansion.Stage_Statistic_Name.toString(), QuestOption.formatDescription(LangExpansion.Stage_Statistic_Description.toString()), "", LangExpansion.Expansion_Label.toString()),
-						StageStatistic.Creator::new)),
-				null));
+						ItemUtils.item(XMaterial.FEATHER, "§a" + LangExpansion.Stage_Statistic_Name.toString(),
+								QuestOption.formatDescription(LangExpansion.Stage_Statistic_Description.toString()), "",
+								LangExpansion.Expansion_Label.toString()),
+						StageStatistic.Creator::new));
+			}
+		});
 		features.add(new ExpansionFeature(
 				LangExpansion.Points_Name.toString(),
-				LangExpansion.Points_Description.toString(),
-				() -> pointsManager = new QuestPointsManager(config.getPointsConfig(), beautyQuests),
-                () -> pointsManager.unload())); // cannot use pointsManager::unload here as the field is not yet initialized
+				LangExpansion.Points_Description.toString()) {
+			@Override
+			public void onLoad() {
+				pointsManager = new QuestPointsManager(config.getPointsConfig(), beautyQuests);
+			}
+
+			@Override
+			public void onUnload() {
+				pointsManager.unload();
+			}
+		}); // cannot use pointsManager::unload here as the field is not yet initialized
 		features.add(new ExpansionFeature(
 				LangExpansion.Quester_Server_Name.toString(),
-				LangExpansion.Quester_Server_Description.toString(),
-				() -> {
-					var questerProvider = new ServerQuesterProvider();
-					QuestsAPI.getAPI().getQuesterManager().registerQuesterProvider(questerProvider);
-					QuestsAPI.getAPI().getQuestQuesterStrategyRegistry().register(new QuestQuesterStrategyCreator("server",
-							ServerQuesterStrategy.class, () -> new ServerQuesterStrategy(questerProvider),
-							LangExpansion.Quester_Server_Name.toString(),
-							LangExpansion.Quester_Server_Description.toString()));
-				},
-				null));
+				LangExpansion.Quester_Server_Description.toString()) {
+			@Override
+			public void onLoad() {
+				var questerProvider = new ServerQuesterProvider();
+				QuestsAPI.getAPI().getQuesterManager().registerQuesterProvider(questerProvider);
+				QuestsAPI.getAPI().getQuestQuesterStrategyRegistry().register(new QuestQuesterStrategyCreator("server",
+						ServerQuesterStrategy.class, () -> new ServerQuesterStrategy(questerProvider),
+						LangExpansion.Quester_Server_Name.toString(),
+						LangExpansion.Quester_Server_Description.toString()));
+			}
+		});
+		features.add(new ExpansionFeature(
+				LangExpansion.Party_Progress_Name.toString(),
+				LangExpansion.Party_Progress_Description.toString()) {
+			BQDependency uniteDep = new BQDependency("Unite",
+					() -> QuestsAPI.getAPI().getStages().autoRegisterOption(new PartyProgressStageOption.AutoRegister()));
+			@Override
+			public void onLoad() {
+				beautyQuests.getIntegrationManager().addDependency(uniteDep);
+			}
+
+			@Override
+			public boolean isLoaded() {
+				return uniteDep.isEnabled();
+			}
+		});
 	}
 
 	private void loadFeatures() {

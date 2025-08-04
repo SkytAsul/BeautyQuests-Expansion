@@ -12,3 +12,4 @@ depend:
 softdepend:
 - Rankup
 - PlaceholderAPI
+- Unite

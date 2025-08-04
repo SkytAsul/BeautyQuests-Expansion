@@ -28,7 +28,7 @@ public class TrackingOption<T extends AbstractStage & Locatable> extends StageOp
 
 	private int itemSlot;
 
-	public TrackingOption(Class<T> stageClass) {
+	public TrackingOption(Class<? extends T> stageClass) {
 		super(stageClass);
 	}
 

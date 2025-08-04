@@ -169,6 +169,13 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.PikaMug</groupId>
+			<artifactId>Unite</artifactId>
+			<version>1.2.0</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Libraries in BQ but relocated damn idk how to handle that-->
 		<dependency>
 			<groupId>com.tchristofferson</groupId>

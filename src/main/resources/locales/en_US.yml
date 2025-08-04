@@ -85,3 +85,6 @@ quester:
     name: Server quester
     description: The progress of the quest will be shared between all players in the server.
     tooltip: §dWhole server quest!
+party progress:
+  name: Party progress sharing
+  description: Share the progress of the quest with all players in the party

@@ -68,6 +68,9 @@ public enum LangExpansion implements Locale {
 	Quester_Server_Description("quester.server.description"),
 	Quester_Server_Tooltip("quester.server.tooltip"),
 
+	Party_Progress_Name("party progress.name"),
+	Party_Progress_Description("party progress.description"),
+
 	;
 
 	private final String path;
