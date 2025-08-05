@@ -23,7 +23,7 @@ import java.util.Optional;
 
 public class PartyProgressStageOption<T extends AbstractStage> extends StageOption<T> implements StageQuesterStrategy {
 
-	private static final LoggerExpanded LOGGER = LoggerExpanded.get("BeautyQuests-Expansion.PartyProgressStageOption");
+	private static final LoggerExpanded LOGGER = LoggerExpanded.get("BeautyQuests Expansion.PartyProgressStageOption");
 
 	private boolean enabled;
 

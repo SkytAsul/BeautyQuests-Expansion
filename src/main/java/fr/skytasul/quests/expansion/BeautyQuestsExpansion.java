@@ -53,8 +53,10 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 			beautyQuests = BeautyQuests.getInstance();
 
-			if (beautyQuests.getLoggerHandler() != null)
+			if (beautyQuests.getLoggerHandler() != null) {
 				getLogger().addHandler(beautyQuests.getLoggerHandler());
+				getLogger().setLevel(LoggerExpanded.DEBUG_LEVEL);
+			}
 		}catch (Throwable ex) {
 			getLogger().severe("Failed to inject custom loggers. This may be due to BeautyQuests being outdated.");
 		}
@@ -206,7 +208,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 				LangExpansion.Quester_Server_Description.toString()) {
 			@Override
 			public void onLoad() {
-				var questerProvider = new ServerQuesterProvider();
+				var questerProvider = new ServerQuesterProvider(BeautyQuestsExpansion.this);
 				QuestsAPI.getAPI().getQuesterManager().registerQuesterProvider(questerProvider);
 				QuestsAPI.getAPI().getQuestQuesterStrategyRegistry().register(new QuestQuesterStrategyCreator("server",
 						ServerQuesterStrategy.class, () -> new ServerQuesterStrategy(questerProvider),

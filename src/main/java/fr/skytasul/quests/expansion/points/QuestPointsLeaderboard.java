@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class QuestPointsLeaderboard {
 
-	private static final LoggerExpanded LOGGER = LoggerExpanded.get("BeautyQuests-Expansion.QuestPointsLeaderboard");
+	private static final LoggerExpanded LOGGER = LoggerExpanded.get("BeautyQuests Expansion.QuestPointsLeaderboard");
 
 	private static final long CACHE_TIME_TICKS = 40 * 20;
 	private static final LeaderboardEntry LOADING_ENTRY = new LeaderboardEntry("loading...", 0);
