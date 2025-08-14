@@ -74,3 +74,11 @@ points:
     balance: '§aVous avez §l{quest_points_balance}§a points de quête !'
     balancePlayer: '§a{target_name} a {quest_points_balance} points de quête.'
     added: '{quest_points_balance} points de quête ajoutés à {target_name}.'
+quester:
+  server:
+    name: Quêteur "serveur"
+    description: La progression de la quête sera partagée entre tous les joueurs du serveur.
+    tooltip: '§dQuête du serveur tout entier !'
+party progress:
+  name: Partage de la progression avec un groupe
+  description: Partager la progression de la quête avec tous les joueurs de son groupe

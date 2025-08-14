@@ -74,3 +74,8 @@ points:
     balance: '§l{quest_points_balance}§a küldetés pontod van!'
     balancePlayer: '§a{target_name} játékosnak {quest_points_balance} küldetés pontja van.'
     added: '{quest_points_balance} küldetés pont hozzáadva {target_name} játékos egyenlegéhez.'
+quester:
+  server:
+    name: Teljes szerver
+    description: A küldetés előrehaladását minden játékos közösen éri el a szerveren.
+    tooltip: '§dA teljes szerverre vonatkozó küldetés!'

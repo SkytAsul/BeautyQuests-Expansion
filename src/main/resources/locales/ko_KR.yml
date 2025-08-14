@@ -1,4 +1,7 @@
+expansion:
+  label: '§d§l§o확장 기능!'
 features:
+  header: '§f확장 기능({features_amount}):'
   unloaded: '(로드되지 않음)'
 timelimit:
   name: 시간 제한
@@ -8,9 +11,13 @@ timelimit:
   editor: 플레이어가 이 퀘스트를 완료하는 데 걸릴 수 있는 최대 시간을 입력합니다.
 stage:
   statistic:
+    name: 통계 단계
     description: >-
       플레이어는 "걸은 거리" 또는 "열린 상자 수"와 같은 특정 통계 값과 일치해야 합니다.
+    advancement: '통계 {statistic_type_name}의 {remaining_value}에 도달합니다'
     gui:
+      stat: '§d달성 통계'
+      limit: '§c달성 제한'
       stats:
         block: '블록 정보'
         item: '아이템 정보'
