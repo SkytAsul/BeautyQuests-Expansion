@@ -110,7 +110,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 			String revisionStr = matcher.group(3);
 			int revision = revisionStr == null ? 0 : Integer.parseInt(revisionStr);
 			String buildStr = matcher.group(4);
-			boolean useBuildNumber = false;
+			boolean useBuildNumber = true;
 
 			if (!useBuildNumber || buildStr == null) {
 				// means it's a release: we must use the major/minor/revision numbers
@@ -119,7 +119,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 				// we have build number: it's easier to just use it instead of the version numbers
 				try {
 					int build = Integer.parseInt(buildStr);
-					return build >= 15;
+					return build >= 88;
 				}catch (NumberFormatException ex) {
 					logger.warning(
 							"Cannot parse BeautyQuests version. This version of the expansion might not be compatible.");
