@@ -81,7 +81,8 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 	}
 
 	private void startAutomaticQuest(@NotNull Quest quest) {
-		if (quest.getOptionValueOrDef(OptionAutoQuest.class) && !quester.getDataHolder().hasQuestData(quest)) {
+		if (quest.getOptionValueOrDef(OptionAutoQuest.class) && !quester.getDataHolder().hasQuestData(quest)
+				&& quest.getQuesterStrategy().isQuesterApplicable(quester)) {
 			LOGGER.debug(
 					"Starting the quest {} for server quester since it is an automatic quest and no previous data has been found.",
 					quest.getId());
