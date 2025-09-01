@@ -18,7 +18,6 @@ import fr.skytasul.quests.api.stages.creation.StageCreation;
 import fr.skytasul.quests.api.stages.creation.StageCreationContext;
 import fr.skytasul.quests.api.utils.ComparisonMethod;
 import fr.skytasul.quests.api.utils.messaging.PlaceholderRegistry;
-import fr.skytasul.quests.api.utils.messaging.PlaceholdersContext.PlayerPlaceholdersContext;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
 import org.bukkit.Bukkit;
@@ -103,8 +102,12 @@ public class StageStatistic extends AbstractStage {
 		String offsetName = getOffsetName();
 		placeholders.registerIndexed("statistic_type_name",
 				statistic.name() + (offsetName == null ? "" : "(" + offsetName + ")"));
-		placeholders.registerIndexedContextual("remaining_value", PlayerPlaceholdersContext.class,
-				context -> Integer.toString(limit - getPlayerTarget(context.getActor(), context.getQuester())));
+		placeholders.registerIndexedContextual("remaining_value", StageDescriptionPlaceholdersContext.class,
+				context -> {
+					if (context.getQuester() instanceof PlayerQuester quester && quester.isActive())
+						return Integer.toString(limit - getPlayerTarget(quester.getPlayer().get(), quester));
+					return "error: not a player";
+				});
 		placeholders.registerIndexed("statistic_name", statistic.name());
 		placeholders.registerIndexed("type_name", offsetName);
 		placeholders.register("target_value", limit);
