@@ -20,6 +20,7 @@ import fr.skytasul.quests.expansion.questers.server.ServerQuesterProvider;
 import fr.skytasul.quests.expansion.questers.server.ServerQuesterStrategy;
 import fr.skytasul.quests.expansion.stages.StageStatistic;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 	private ExpansionConfiguration config;
 	private TrackerRegistry trackersRegistry;
 	private QuestPointsManager pointsManager;
+	private BukkitAudiences audiences;
 
 	@Override
 	public void onLoad() {
@@ -75,6 +77,8 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 				throw new LoadingException("This version of the expansion is not compatible with the version of BeautyQuests.");
 
 			logger.info("Hooked expansion version " + getDescription().getVersion());
+
+			audiences = BukkitAudiences.create(this);
 
 			loadConfig();
 			loadLang();
@@ -257,6 +261,10 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 	public QuestPointsManager getPointsManager() {
 		return pointsManager;
+	}
+
+	public BukkitAudiences getAudiences() {
+		return audiences;
 	}
 
 	public static class LoadingException extends Exception {

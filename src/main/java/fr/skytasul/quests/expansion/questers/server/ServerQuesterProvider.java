@@ -1,6 +1,5 @@
 package fr.skytasul.quests.expansion.questers.server;
 
-import fr.skytasul.quests.BeautyQuests;
 import fr.skytasul.quests.api.QuestsAPI;
 import fr.skytasul.quests.api.questers.Quester;
 import fr.skytasul.quests.api.questers.QuesterManager;
@@ -101,8 +100,7 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 
 	private class ServerQuester extends AbstractQuesterImplementation implements ForwardingAudience {
 
-		private final Iterable<? extends Audience> playersAudience =
-				List.of(BeautyQuests.getInstance().getAudiences().players());
+		private final Iterable<? extends Audience> playersAudience = List.of(plugin.getAudiences().players());
 
 		protected ServerQuester(@NotNull QuesterProvider provider, @NotNull QuesterData dataHolder) {
 			super(provider, dataHolder);
