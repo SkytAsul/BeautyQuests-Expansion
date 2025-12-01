@@ -5,9 +5,7 @@ import fr.skytasul.quests.api.QuestsPlugin;
 import fr.skytasul.quests.api.editors.TextEditor;
 import fr.skytasul.quests.api.editors.parsers.NumberParser;
 import fr.skytasul.quests.api.gui.ItemUtils;
-import fr.skytasul.quests.api.gui.close.CloseBehavior;
-import fr.skytasul.quests.api.gui.close.DelayCloseBehavior;
-import fr.skytasul.quests.api.gui.templates.PagedGUI;
+import fr.skytasul.quests.api.gui.templates.StaticPagedGUI;
 import fr.skytasul.quests.api.options.QuestOption;
 import fr.skytasul.quests.api.players.PlayerQuester;
 import fr.skytasul.quests.api.questers.Quester;
@@ -18,6 +16,8 @@ import fr.skytasul.quests.api.stages.creation.StageCreation;
 import fr.skytasul.quests.api.stages.creation.StageCreationContext;
 import fr.skytasul.quests.api.utils.ComparisonMethod;
 import fr.skytasul.quests.api.utils.messaging.PlaceholderRegistry;
+import fr.skytasul.quests.api.utils.progress.HasProgress;
+import fr.skytasul.quests.api.utils.progress.ProgressPlaceholders;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
 import org.bukkit.Bukkit;
@@ -28,17 +28,17 @@ import org.bukkit.Statistic.Type;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class StageStatistic extends AbstractStage {
+public class StageStatistic extends AbstractStage implements HasProgress {
 
 	private final Statistic statistic;
 	private final Material offsetMaterial;
@@ -50,6 +50,8 @@ public class StageStatistic extends AbstractStage {
 
 	private BukkitTask task;
 	private List<Player> players;
+
+	private Map<Quester, Integer> lastValues = new HashMap<>();
 
 	public StageStatistic(StageController controller, Statistic statistic, int limit, ComparisonMethod comparison,
 			boolean relative) {
@@ -111,6 +113,19 @@ public class StageStatistic extends AbstractStage {
 		placeholders.registerIndexed("statistic_name", statistic.name());
 		placeholders.registerIndexed("type_name", offsetName);
 		placeholders.register("target_value", limit);
+		ProgressPlaceholders.registerProgress(placeholders, "statistic", this);
+	}
+
+	@Override
+	public long getTotalAmount() {
+		return limit;
+	}
+
+	@Override
+	public long getRemainingAmount(@NotNull Quester quester) {
+		if (!(quester instanceof PlayerQuester playerQuester))
+			throw new IllegalArgumentException("Not a player");
+		return limit - getPlayerTarget(playerQuester.getPlayer().get(), quester);
 	}
 
 	private String getOffsetName() {
@@ -145,8 +160,15 @@ public class StageStatistic extends AbstractStage {
 			if (!matchesRequirements(player)) return;
 
 			for (Quester quester : controller.getApplicableQuesters(player)) {
-				if (comparison.test(getPlayerTarget(player, quester) - limit))
+				int playerTarget = getPlayerTarget(player, quester);
+				if (lastValues.getOrDefault(quester, Integer.MIN_VALUE) == playerTarget)
+					continue;
+				lastValues.put(quester, playerTarget);
+
+				if (comparison.test(playerTarget - limit))
 					controller.finishStage(quester);
+				else
+					controller.notifyQuesterUpdate(quester);
 			}
 		});
 	}
@@ -244,49 +266,30 @@ public class StageStatistic extends AbstractStage {
 
 	public static class Creator extends StageCreation<StageStatistic> {
 
-		static class StatisticListGUI extends PagedGUI<Statistic> {
+		private static Map<Statistic, ItemStack> STATISTIC_ITEMS =
+				Stream.of(Statistic.values()).collect(Collectors.toMap(stat -> stat, Creator::getStatisticItem));
 
-			private final Consumer<Statistic> end;
-
-			public StatisticListGUI(Consumer<Statistic> end) {
-				super(LangExpansion.Stage_Statistic_StatList_Gui_Name.toString(), DyeColor.LIGHT_BLUE, Arrays.asList(Statistic.values()), null, Statistic::name);
-				this.end = end;
+		private static ItemStack getStatisticItem(Statistic object) {
+			XMaterial material;
+			String lore = null;
+			switch (object.getType()) {
+			case BLOCK:
+				material = XMaterial.GRASS_BLOCK;
+				lore = LangExpansion.Stage_Statistic_StatList_Gui_Block.toString();
+				break;
+			case ENTITY:
+				material = XMaterial.BLAZE_SPAWN_EGG;
+				lore = LangExpansion.Stage_Statistic_StatList_Gui_Entity.toString();
+				break;
+			case ITEM:
+				material = XMaterial.STONE_HOE;
+				lore = LangExpansion.Stage_Statistic_StatList_Gui_Item.toString();
+				break;
+			default:
+				material = XMaterial.FEATHER;
+				break;
 			}
-
-			@Override
-			public ItemStack getItemStack(Statistic object) {
-				XMaterial material;
-				String lore = null;
-				switch (object.getType()) {
-				case BLOCK:
-					material = XMaterial.GRASS_BLOCK;
-					lore = LangExpansion.Stage_Statistic_StatList_Gui_Block.toString();
-					break;
-				case ENTITY:
-					material = XMaterial.BLAZE_SPAWN_EGG;
-					lore = LangExpansion.Stage_Statistic_StatList_Gui_Entity.toString();
-					break;
-				case ITEM:
-					material = XMaterial.STONE_HOE;
-					lore = LangExpansion.Stage_Statistic_StatList_Gui_Item.toString();
-					break;
-				default:
-					material = XMaterial.FEATHER;
-					break;
-				}
-				return ItemUtils.item(material, "§e" + object.name(), QuestOption.formatDescription(lore));
-			}
-
-			@Override
-			public void click(Statistic existing, ItemStack item, ClickType clickType) {
-				end.accept(existing);
-			}
-
-			@Override
-			public @NotNull CloseBehavior onClose(@NotNull Player player) {
-				return new DelayCloseBehavior(() -> end.accept(null));
-			}
-
+			return ItemUtils.item(material, "§e" + object.name(), QuestOption.formatDescription(lore));
 		}
 
 		private static final int SLOT_STAT = 5;
@@ -352,54 +355,57 @@ public class StageStatistic extends AbstractStage {
 		}
 
 		private void openStatisticGUI(Player p, Runnable cancel, boolean askLimit) {
-			new StatisticListGUI(stat -> {
-				if (stat == null) {
-					cancel.run();
-				} else {
-					switch (stat.getType()) {
-						case BLOCK:
-						case ITEM:
-							boolean isItem = stat.getType() == Type.ITEM;
-							new TextEditor<>(p, cancel, offset -> {
-								Runnable end = () -> {
-									offsetMaterial = offset.parseMaterial();
-									setStatistic(stat);
-									context.reopenGui();
-								};
-								if (askLimit) {
-									openLimitEditor(p, cancel, end);
-								} else
-									end.run();
+			new StaticPagedGUI<>(LangExpansion.Stage_Statistic_StatList_Gui_Name.toString(), DyeColor.LIGHT_BLUE,
+					STATISTIC_ITEMS, stat -> {
+						if (stat == null) {
+							cancel.run();
+						} else {
+							switch (stat.getType()) {
+								case BLOCK:
+								case ITEM:
+									boolean isItem = stat.getType() == Type.ITEM;
+									new TextEditor<>(p, cancel, offset -> {
+										Runnable end = () -> {
+											offsetMaterial = offset.parseMaterial();
+											setStatistic(stat);
+											context.reopenGui();
+										};
+										if (askLimit) {
+											openLimitEditor(p, cancel, end);
+										} else
+											end.run();
 
-							}, QuestsPlugin.getPlugin().getEditorManager().getFactory().getMaterialParser(isItem, !isItem))
-									.start();
-							break;
-						case ENTITY:
-							QuestsPlugin.getPlugin().getGuiManager().getFactory().createEntityTypeSelection(offset -> {
-								Runnable end = () -> {
-									offsetEntity = offset;
-									setStatistic(stat);
-									context.reopenGui();
-								};
-								if (askLimit) {
-									openLimitEditor(p, cancel, end);
-								} else
-									end.run();
-							}, null).open(p);
-							break;
-						default:
-							Runnable end = () -> {
-								setStatistic(stat);
-								context.reopenGui();
-							};
-							if (askLimit) {
-								openLimitEditor(p, cancel, end);
-							} else
-								end.run();
-							break;
-					}
-				}
-			}).sortValues(Statistic::name).open(p);
+									}, QuestsPlugin.getPlugin().getEditorManager().getFactory().getMaterialParser(isItem,
+											!isItem))
+													.start();
+									break;
+								case ENTITY:
+									QuestsPlugin.getPlugin().getGuiManager().getFactory()
+											.createEntityTypeSelection(offset -> {
+												Runnable end = () -> {
+													offsetEntity = offset;
+													setStatistic(stat);
+													context.reopenGui();
+												};
+												if (askLimit) {
+													openLimitEditor(p, cancel, end);
+												} else
+													end.run();
+											}, null).open(p);
+									break;
+								default:
+									Runnable end = () -> {
+										setStatistic(stat);
+										context.reopenGui();
+									};
+									if (askLimit) {
+										openLimitEditor(p, cancel, end);
+									} else
+										end.run();
+									break;
+							}
+						}
+					}).addSearchButton(Statistic::name, true).open(p);
 		}
 
 		private void openLimitEditor(Player p, Runnable cancel, Runnable end) {
