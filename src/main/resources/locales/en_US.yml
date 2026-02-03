@@ -32,6 +32,11 @@ stage:
         entity: 'Entity parameter'
     editor:
       limit: 'Write the target limit for the selected statistic:'
+  requirements:
+    name: Wait for Requirements stage
+    description: >-
+      Waits until the validation requirements are met for the player.
+      All BeautyQuests requirements are supported: level, placeholder, equipment...
 tracking:
   name: Objective trackers
   description: >-

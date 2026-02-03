@@ -18,6 +18,7 @@ import fr.skytasul.quests.expansion.options.TimeLimitOption;
 import fr.skytasul.quests.expansion.points.QuestPointsManager;
 import fr.skytasul.quests.expansion.questers.server.ServerQuesterProvider;
 import fr.skytasul.quests.expansion.questers.server.ServerQuesterStrategy;
+import fr.skytasul.quests.expansion.stages.StageWaitRequirements;
 import fr.skytasul.quests.expansion.stages.StageStatistic;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -192,6 +193,22 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 								QuestOption.formatDescription(LangExpansion.Stage_Statistic_Description.toString()), "",
 								LangExpansion.Expansion_Label.toString()),
 						StageStatistic.Creator::new));
+			}
+		});
+		features.add(new ExpansionFeature(
+				LangExpansion.Stage_Requirements_Name.toString(),
+				LangExpansion.Stage_Requirements_Description.toString()) {
+			@Override
+			public void onLoad() {
+				QuestsAPI.getAPI().getStages().register(new StageType<>(
+						"requirements",
+						StageWaitRequirements.class,
+						LangExpansion.Stage_Requirements_Name.toString(),
+						StageWaitRequirements::deserialize,
+						ItemUtils.item(XMaterial.NETHER_STAR, "§a" + LangExpansion.Stage_Requirements_Name.toString(),
+								QuestOption.formatDescription(LangExpansion.Stage_Requirements_Description.toString()), "",
+								LangExpansion.Expansion_Label.toString()),
+						StageWaitRequirements.Creator::new));
 			}
 		});
 		features.add(new ExpansionFeature(

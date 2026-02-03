@@ -163,12 +163,14 @@ public class StageStatistic extends AbstractStage implements HasProgress {
 				int playerTarget = getPlayerTarget(player, quester);
 				if (lastValues.getOrDefault(quester, Integer.MIN_VALUE) == playerTarget)
 					continue;
-				lastValues.put(quester, playerTarget);
 
-				if (comparison.test(playerTarget - limit))
+				if (comparison.test(playerTarget - limit)) {
+					lastValues.remove(quester);
 					controller.finishStage(quester);
-				else
+				} else {
+					lastValues.put(quester, playerTarget);
 					controller.notifyQuesterUpdate(quester);
+				}
 			}
 		});
 	}

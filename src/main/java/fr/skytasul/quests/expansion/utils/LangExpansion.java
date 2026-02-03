@@ -32,6 +32,9 @@ public enum LangExpansion implements Locale {
 	Stage_Statistic_StatList_Gui_Entity("stage.statistic.gui.stats.entity"),
 	Stage_Statistic_EDITOR_LIMIT("stage.statistic.editor.limit", Lang.EditorPrefix),
 
+	Stage_Requirements_Name("stage.requirements.name"),
+	Stage_Requirements_Description("stage.requirements.description"),
+
 	Tracking_Trackers("tracking.trackers"), // 0: tracker amount
 	Tracking_Name("tracking.name"),
 	Tracking_Description("tracking.description"), // 0: available trackers
