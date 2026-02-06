@@ -18,8 +18,8 @@ import fr.skytasul.quests.expansion.options.TimeLimitOption;
 import fr.skytasul.quests.expansion.points.QuestPointsManager;
 import fr.skytasul.quests.expansion.questers.server.ServerQuesterProvider;
 import fr.skytasul.quests.expansion.questers.server.ServerQuesterStrategy;
-import fr.skytasul.quests.expansion.stages.StageWaitRequirements;
 import fr.skytasul.quests.expansion.stages.StageStatistic;
+import fr.skytasul.quests.expansion.stages.StageWaitRequirements;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -119,12 +119,12 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 			if (!useBuildNumber || buildStr == null) {
 				// means it's a release: we must use the major/minor/revision numbers
-				return major >= 2 && revision >= 0;
+				return major >= 2 && minor >= 1;
 			} else {
 				// we have build number: it's easier to just use it instead of the version numbers
 				try {
 					int build = Integer.parseInt(buildStr);
-					return build >= 92;
+					return build >= 126;
 				}catch (NumberFormatException ex) {
 					logger.warning(
 							"Cannot parse BeautyQuests version. This version of the expansion might not be compatible.");
