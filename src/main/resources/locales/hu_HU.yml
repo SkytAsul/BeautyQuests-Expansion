@@ -79,3 +79,6 @@ quester:
     name: Teljes szerver
     description: A küldetés előrehaladását minden játékos közösen éri el a szerveren.
     tooltip: '§dA teljes szerverre vonatkozó küldetés!'
+party progress:
+  name: Party haladás megosztás
+  description: A party minden tagja hozzájárul a küldetés haladásához

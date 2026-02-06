@@ -28,6 +28,10 @@ stage:
         entity: 'Paramètre "entité"'
     editor:
       limit: 'Écrivez la limite cible pour la statistique sélectionnée :'
+  requirements:
+    name: Étape "Attendre une condition"
+    description: >-
+      Attend que les conditions de validation soient remplies pour le joueur. Toutes les conditions de BeautyQuests sont prises en charge : niveau, placeholder, équipement...
 tracking:
   name: Traqueurs d'objectif
   description: >-

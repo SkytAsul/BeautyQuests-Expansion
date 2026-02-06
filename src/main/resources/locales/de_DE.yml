@@ -7,8 +7,8 @@ timelimit:
   name: Zeitlimit
   description: >-
     Zeitlimit für die Quest. Nachdem Spieler die Quest gestartet haben, können sie diese nur innerhalb der festgelegten Zeit beenden.
-  left: '§8> Verbleibende Zeit: $7{time_left}'
-  editor: Gib die maximale Dauer an, die ein Spieler zum Beenden der Quest nehmen kann.
+  left: '§8> Verbleibende Zeit: §7{time_left}'
+  editor: Schreibe die maximale Dauer, die ein Spieler in Anspruch nehmen kann, um diese Quest abzuschließen.
 stage:
   statistic:
     name: Statistikstufe
@@ -51,7 +51,7 @@ tracking:
     name: '§dLeuchten'
     description: Bringt Zielblöcke oder Entitäten zum Leuchten.
   gps:
-    name: '§dGps'
+    name: '§dGPS'
     description: Zeigt einen Pfeil zum Zielort.
 points:
   name: Questpunkte
@@ -72,5 +72,13 @@ points:
       target: 'Gib die Zielanzahl an Questpunkten ein:'
   command:
     balance: '§aDu hast §l{quest_points_balance}§a Questpunkte!'
-    balancePlayer: '§a{target_name}''s Stand: {quest_points_balance} Questpunkte.'
-    added: '{quest_points_balance} Questpunkte zu {target_name}''s Stand hinzugefügt.'
+    balancePlayer: '§a{target_name}''s Punktestand: {quest_points_balance} Questpunkte.'
+    added: '{quest_points_balance} Questpunkte zu {target_name}''s Punktestand hinzugefügt.'
+quester:
+  server:
+    name: Name der Serverquest
+    description: Der Fortschritt der Quest wird zwischen allen Spielern auf dem Server geteilt.
+    tooltip: '§dQuest für den ganzen Server!'
+party progress:
+  name: Gruppenfortschritt teilen
+  description: Teile den Fortschritt der Quest mit allen Spielern in der Gruppe

@@ -1,0 +1,11 @@
+expansion:
+  label: ''
+timelimit:
+  name: เวลาจำกัด
+  left: '§8> เวลาที่เหลือ: §7{time_left}'
+tracking:
+  glowing:
+    name: '§dเรืองแสง'
+points:
+  command:
+    balance: '§aคุณมี §l{quest_points_balance}§a แต้มเควส!'
