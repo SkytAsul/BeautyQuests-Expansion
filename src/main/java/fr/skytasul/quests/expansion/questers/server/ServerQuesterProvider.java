@@ -1,16 +1,14 @@
 package fr.skytasul.quests.expansion.questers.server;
 
-import fr.skytasul.quests.api.QuestsAPI;
 import fr.skytasul.quests.api.questers.Quester;
 import fr.skytasul.quests.api.questers.QuesterManager;
 import fr.skytasul.quests.api.questers.QuesterProvider;
 import fr.skytasul.quests.api.questers.data.QuesterData;
 import fr.skytasul.quests.api.questers.data.QuesterDataManager.QuesterFetchRequest;
-import fr.skytasul.quests.api.quests.Quest;
-import fr.skytasul.quests.api.quests.events.QuestCreateEvent;
+import fr.skytasul.quests.api.questers.events.QuesterJoinEvent;
+import fr.skytasul.quests.api.questers.events.QuesterLeaveEvent;
 import fr.skytasul.quests.api.utils.logger.LoggerExpanded;
 import fr.skytasul.quests.expansion.BeautyQuestsExpansion;
-import fr.skytasul.quests.options.OptionAutoQuest;
 import fr.skytasul.quests.questers.AbstractQuesterImplementation;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -20,10 +18,13 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class ServerQuesterProvider implements QuesterProvider, Listener {
@@ -36,7 +37,7 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 	private final BeautyQuestsExpansion plugin;
 
 	private ServerQuester quester;
-	private List<ServerQuester> questerList;
+	private List<ServerQuester> questerList = Collections.emptyList();
 
 	public ServerQuesterProvider(@NotNull BeautyQuestsExpansion plugin) {
 		this.plugin = plugin;
@@ -70,28 +71,22 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 
 					LOGGER.debug("Loaded Server quester.");
 
-					Bukkit.getScheduler().runTask(plugin, () -> {
-						for (var quest : QuestsAPI.getAPI().getQuestsManager().getQuests())
-							startAutomaticQuest(quest);
-					});
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						Bukkit.getPluginManager().callEvent(new QuesterJoinEvent(quester, player, false));
+					}
 
 					Bukkit.getPluginManager().registerEvents(this, plugin);
 				}, "Failed to load data of server quester.", null));
 	}
 
-	private void startAutomaticQuest(@NotNull Quest quest) {
-		if (quest.getOptionValueOrDef(OptionAutoQuest.class) && !quester.getDataHolder().hasQuestData(quest)
-				&& quest.getQuesterStrategy().isQuesterApplicable(quester)) {
-			LOGGER.debug(
-					"Starting the quest {} for server quester since it is an automatic quest and no previous data has been found.",
-					quest.getId());
-			quest.start(quester, false);
-		}
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		Bukkit.getPluginManager().callEvent(new QuesterJoinEvent(quester, event.getPlayer(), false));
 	}
 
 	@EventHandler
-	public void onQuestCreated(QuestCreateEvent event) {
-		startAutomaticQuest(event.getQuest());
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Bukkit.getPluginManager().callEvent(new QuesterLeaveEvent(quester, event.getPlayer()));
 	}
 
 	public @Nullable Quester getQuester() {
@@ -113,7 +108,7 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 
 		@Override
 		public boolean isActive() {
-			return true;
+			return !Bukkit.getOnlinePlayers().isEmpty();
 		}
 
 		@Override
