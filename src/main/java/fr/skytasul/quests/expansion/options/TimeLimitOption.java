@@ -30,6 +30,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class TimeLimitOption extends QuestOption<Integer> implements Listener, QuestDescriptionProvider {
@@ -56,8 +57,14 @@ public class TimeLimitOption extends QuestOption<Integer> implements Listener, Q
 		return ItemUtils.item(XMaterial.CLOCK, "§d" + LangExpansion.TimeLimit_Name.toString(), getLore());
 	}
 
+	@Override
+	public @Nullable String getValueString() {
+		return Utils.millisToHumanString(getValue() * 1000L);
+	}
+
 	private String[] getLore() {
-		return new String[] { formatDescription(LangExpansion.TimeLimit_Description.toString()), "", formatValue(Utils.millisToHumanString(getValue() * 1000L)), "", LangExpansion.Expansion_Label.toString() };
+		return new String[] {formatDescription(LangExpansion.TimeLimit_Description.toString()), "", formatValue(), "",
+				LangExpansion.Expansion_Label.toString()};
 	}
 
 	@Override
@@ -82,13 +89,13 @@ public class TimeLimitOption extends QuestOption<Integer> implements Listener, Q
 	}
 
 	@Override
-	public void detach() {
-		super.detach();
-
+	public Quest detach() {
 		if (tasks != null) {
 			tasks.forEach((acc, task) -> task.cancel());
 			tasks = null;
 		}
+
+		return super.detach();
 	}
 
 	private OptionalLong getRemainingTime(@NotNull Quester quester) {
