@@ -123,13 +123,17 @@ public class TimeLimitOption extends QuestOption<Integer> implements Listener, Q
 			QuestUtils.runSync(() -> getAttachedQuest().cancelQuester(quester));
 		}else {
 			tasks.put(quester, Bukkit.getScheduler().runTaskLater(BeautyQuestsExpansion.getInstance(),
-					() -> getAttachedQuest().cancelQuester(quester), timeToWait.getAsLong() / 50));
+					() -> {
+						tasks.remove(quester);
+						getAttachedQuest().cancelQuester(quester);
+					}, timeToWait.getAsLong() / 50));
 		}
 	}
 
 	private void cancelTask(Quester quester) {
 		BukkitTask task = tasks.remove(quester);
-		if (task != null) task.cancel();
+		if (task != null)
+			task.cancel();
 	}
 
 	@EventHandler (priority = EventPriority.HIGHEST)
@@ -146,7 +150,7 @@ public class TimeLimitOption extends QuestOption<Integer> implements Listener, Q
 
 	@EventHandler
 	public void onAccountLeave(QuesterLeaveEvent event) {
-		if (event.getQuester().getOnlinePlayers().isEmpty())
+		if (event.isLastOnlinePlayer())
 			cancelTask(event.getQuester());
 	}
 
