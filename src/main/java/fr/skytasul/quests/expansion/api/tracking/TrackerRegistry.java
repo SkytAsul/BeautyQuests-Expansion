@@ -13,7 +13,6 @@ import fr.skytasul.quests.api.stages.options.StageOptionCreator;
 import fr.skytasul.quests.api.stages.types.Locatable;
 import fr.skytasul.quests.api.stages.types.Locatable.LocatedType;
 import fr.skytasul.quests.api.utils.IntegrationManager.BQDependency;
-import fr.skytasul.quests.api.utils.MinecraftVersion;
 import fr.skytasul.quests.expansion.options.TrackingOption;
 import fr.skytasul.quests.expansion.tracking.*;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
@@ -38,16 +37,14 @@ public class TrackerRegistry extends QuestObjectsRegistry<Tracker, TrackerCreato
 				ItemUtils.item(XMaterial.ACACIA_STAIRS, LangExpansion.Tracking_Outline_Block_Name.toString(),
 						QuestOption.formatDescription(LangExpansion.Tracking_Outline_Block_Description.toString())),
 				BlockOutlineTracker::new, type -> Locatable.hasLocatedTypes(type.getStageClass(), LocatedType.BLOCK)));
-		if (MinecraftVersion.MAJOR >= 17)
-			register(new TrackerCreator("glowing", GlowingTracker.class,
-					ItemUtils.item(XMaterial.SPECTRAL_ARROW, LangExpansion.Tracking_Glowing_Name.toString(),
-							QuestOption.formatDescription(LangExpansion.Tracking_Glowing_Description.toString())),
-					GlowingTracker::new, GlowingTracker::isStageEnabled));
-		if (MinecraftVersion.MAJOR >= 13)
-			register(new TrackerCreator("beacon-beam", BeaconTracker.class,
-					ItemUtils.item(XMaterial.BEACON, LangExpansion.Tracking_Beacon_Name.toString(),
-							QuestOption.formatDescription(LangExpansion.Tracking_Beacon_Description.toString())),
-					BeaconTracker::new, this::isPreciseLocatable));
+		register(new TrackerCreator("glowing", GlowingTracker.class,
+				ItemUtils.item(XMaterial.SPECTRAL_ARROW, LangExpansion.Tracking_Glowing_Name.toString(),
+						QuestOption.formatDescription(LangExpansion.Tracking_Glowing_Description.toString())),
+				GlowingTracker::new, GlowingTracker::isStageEnabled));
+		register(new TrackerCreator("beacon-beam", BeaconTracker.class,
+				ItemUtils.item(XMaterial.BEACON, LangExpansion.Tracking_Beacon_Name.toString(),
+						QuestOption.formatDescription(LangExpansion.Tracking_Beacon_Description.toString())),
+				BeaconTracker::new, this::isPreciseLocatable));
 
 		register(new TrackerCreator("region-outline", RegionOutlineTracker.class, ItemUtils.item(XMaterial.IRON_AXE, LangExpansion.Tracking_Outline_Region_Name.toString(), QuestOption.formatDescription(LangExpansion.Tracking_Outline_Region_Description.toString())), RegionOutlineTracker::new, type -> type.getStageClass() == StageArea.class));
 
