@@ -21,7 +21,6 @@ import fr.skytasul.quests.expansion.questers.server.ServerQuesterStrategy;
 import fr.skytasul.quests.expansion.stages.StageStatistic;
 import fr.skytasul.quests.expansion.stages.StageWaitRequirements;
 import fr.skytasul.quests.expansion.utils.LangExpansion;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +45,6 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 	private ExpansionConfiguration config;
 	private TrackerRegistry trackersRegistry;
 	private QuestPointsManager pointsManager;
-	private BukkitAudiences audiences;
 
 	@Override
 	public void onLoad() {
@@ -78,8 +76,6 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 				throw new LoadingException("This version of the expansion is not compatible with the version of BeautyQuests.");
 
 			logger.info("Hooked expansion version " + getDescription().getVersion());
-
-			audiences = BukkitAudiences.create(this);
 
 			loadConfig();
 			loadLang();
@@ -124,9 +120,8 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 				// we have build number: it's easier to just use it instead of the version numbers
 				try {
 					int build = Integer.parseInt(buildStr);
-					if (build == 151)
-						return true; // build 136 was incorrectly numbered
-					return build >= 137 || build == 151;
+					// build 136 was incorrectly numbered as 151
+					return build >= 144 && build != 151;
 				}catch (NumberFormatException ex) {
 					logger.warning(
 							"Cannot parse BeautyQuests version. This version of the expansion might not be compatible.");
@@ -280,10 +275,6 @@ public class BeautyQuestsExpansion extends JavaPlugin {
 
 	public QuestPointsManager getPointsManager() {
 		return pointsManager;
-	}
-
-	public BukkitAudiences getAudiences() {
-		return audiences;
 	}
 
 	public static class LoadingException extends Exception {

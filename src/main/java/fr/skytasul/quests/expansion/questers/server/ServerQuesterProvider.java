@@ -95,15 +95,13 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 
 	private class ServerQuester extends AbstractQuesterImplementation implements ForwardingAudience {
 
-		private final Iterable<? extends Audience> playersAudience = List.of(plugin.getAudiences().players());
-
 		protected ServerQuester(@NotNull QuesterProvider provider, @NotNull QuesterData dataHolder) {
 			super(provider, dataHolder);
 		}
 
 		@Override
 		public @NotNull Iterable<? extends Audience> audiences() {
-			return playersAudience;
+			return Bukkit.getOnlinePlayers();
 		}
 
 		@Override
