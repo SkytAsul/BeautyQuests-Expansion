@@ -1,0 +1,22 @@
+name: BeautyQuests-Expansion
+author: SkytAsul
+version: "${project.version}"
+description: 'Expansion for the BeautyQuests plugin.'
+api-version: "1.20"
+main: fr.skytasul.quests.expansion.BeautyQuestsExpansion
+prefix: 'BeautyQuests Expansion'
+
+dependencies:
+  server:
+    BeautyQuests:
+      load: BEFORE
+      required: true
+    Rankup:
+      load: BEFORE
+      required: false
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+    Unite:
+      load: BEFORE
+      required: false
