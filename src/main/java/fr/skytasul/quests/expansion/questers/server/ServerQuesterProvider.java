@@ -72,7 +72,9 @@ public class ServerQuesterProvider implements QuesterProvider, Listener {
 					LOGGER.debug("Loaded Server quester.");
 
 					for (Player player : Bukkit.getOnlinePlayers()) {
-						Bukkit.getPluginManager().callEvent(new QuesterJoinEvent(quester, player, false));
+						player.getScheduler().run(plugin, __ -> {
+							Bukkit.getPluginManager().callEvent(new QuesterJoinEvent(quester, player, false));
+						}, null);
 					}
 
 					Bukkit.getPluginManager().registerEvents(this, plugin);
