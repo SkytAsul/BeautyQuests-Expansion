@@ -5,7 +5,7 @@
 
 	<groupId>fr.skytasul</groupId>
 	<artifactId>beautyquests-expansion</artifactId>
-	<version>1.4.4</version>
+	<version>1.4.5</version>
 	<packaging>jar</packaging>
 
 	<name>BeautyQuests Expansion</name>
@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<beautyquests.version>2.1.0-SNAPSHOT</beautyquests.version>
+		<beautyquests.version>2.2.0-SNAPSHOT</beautyquests.version>
 	</properties>
 
 	<developers>
@@ -138,7 +138,7 @@
 		<dependency>
 			<groupId>fr.skytasul</groupId>
 			<artifactId>glowingentities</artifactId>
-			<version>2.0.0</version>
+			<version>2.0.2</version>
 			<scope>compile</scope>
 		</dependency>
 

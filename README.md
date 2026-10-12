@@ -1,7 +1,7 @@
 # BeautyQuests Expansion
 
 ## Overview
-This project is an expansion of the [BeautyQuests](https://github.com/SkytAsul/BeautyQuests) Spigot plugin for Minecraft servers.
+This project is an expansion of the [BeautyQuests](https://github.com/SkytAsul/BeautyQuests) Paper plugin for Minecraft servers.
 
 It adds numerous useful and advanced quest features for users that want to create more complex quests.
 
